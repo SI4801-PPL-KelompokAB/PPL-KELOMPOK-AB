@@ -11,12 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('polis', function (Blueprint $table) {
+        Schema::create('doctors', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_poli', 100)->unique();
-            $table->string('nama_poli', 100)->unique();
+
+            $table->foreignId('user_id')
+                ->unique()
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->string('nomor_sip', 100)->nullable();
             $table->text('deskripsi')->nullable();
-            $table->boolean('is_active')->default(true);
+
             $table->timestamps();
         });
     }
@@ -26,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('polis');
+        Schema::dropIfExists('doctors');
     }
 };

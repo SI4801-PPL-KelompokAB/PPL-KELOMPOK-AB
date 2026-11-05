@@ -11,18 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kuota_antreans', function (Blueprint $table) {
+        Schema::create('klinik_cabang', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('poli_id')
-                ->constrained('polis')
-                ->restrictOnDelete();
-
-            $table->date('tanggal');
-            $table->unsignedInteger('kuota_maksimal');
+            $table->string('nama_cabang', 150);
+            $table->text('alamat');
+            $table->string('nomor_telepon', 20)->nullable();
+            $table->boolean('status')->default(true);
             $table->timestamps();
-
-            $table->unique(['poli_id', 'tanggal']);
         });
     }
 
@@ -31,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kuota_antreans');
+        Schema::dropIfExists('klinik_cabang');
     }
 };
