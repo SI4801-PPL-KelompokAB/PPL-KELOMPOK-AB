@@ -9,6 +9,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+use App\Http\Controllers\DokterController;
+use App\Http\Controllers\JadwalDokterController;
+
+Route::resource('dokter', DokterController::class)->except(['show']);
+
+Route::get('/jadwal', [JadwalDokterController::class, 'index'])->name('jadwal.index');
+Route::post('/jadwal', [JadwalDokterController::class, 'store'])->name('jadwal.store');
+
+
 // PBI10: pasien
 Route::prefix('konsultasi')
     ->name('konsultasi.')
