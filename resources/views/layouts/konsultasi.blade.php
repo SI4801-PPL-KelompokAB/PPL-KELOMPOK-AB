@@ -107,7 +107,10 @@
 
                 <span class="font-badge-status text-badge-status bg-secondary-fixed/50 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">{{ auth()->user()->role }}</span>
             </div>
-            <button type="button" class="border border-outline-variant/60 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg px-3 py-1.5 font-body-semibold text-body-sm transition-all">Keluar</button>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="border border-outline-variant/60 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg px-3 py-1.5 font-body-semibold text-body-sm transition-all">Keluar</button>
+            </form>
         </div>
     </div>
 </header>

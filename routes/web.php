@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DokterKonsultasiController;
 use App\Http\Controllers\KonsultasiOnlineController;
 use App\Http\Controllers\RuangKonsultasiController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 // Halaman utama
@@ -61,4 +62,18 @@ Route::prefix('dokter/konsultasi')
 
         Route::post('/{consultation}/selesai', [DokterKonsultasiController::class, 'selesai'])
             ->name('selesai');
+    });
+
+// PBI03: Admin membuat akun dokter dan admin
+Route::prefix('admin/akun')
+    ->name('admin.akun.')
+    ->group(function () {
+        Route::get('/', [UserManagementController::class, 'index'])
+            ->name('index');
+
+        Route::get('/create', [UserManagementController::class, 'create'])
+            ->name('create');
+
+        Route::post('/', [UserManagementController::class, 'store'])
+            ->name('store');
     });
