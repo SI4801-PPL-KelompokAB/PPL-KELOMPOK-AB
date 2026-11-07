@@ -30,7 +30,7 @@ return new class extends Migration
                 'called',
                 'serving',
                 'completed',
-                'skipped'
+                'skipped',
             ])->default('waiting');
 
             $table->timestamps();
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->unique([
                 'doctor_schedule_id',
                 'tanggal_antrean',
-                'nomor_antrean'
+                'nomor_antrean',
             ]);
         });
     }

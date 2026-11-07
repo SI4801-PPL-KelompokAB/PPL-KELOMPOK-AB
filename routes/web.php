@@ -2,8 +2,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\DokterKonsultasiController;
 use App\Http\Controllers\KonsultasiOnlineController;
+use App\Http\Controllers\QueueController;
 use App\Http\Controllers\RuangKonsultasiController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +30,23 @@ Route::post('/login', [AuthController::class, 'login'])
 Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
+
+// PBI07: Admin - Kelola Jadwal Praktik Dokter
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('jadwal', DoctorScheduleController::class)
+        ->parameters(['jadwal' => 'doctorSchedule'])
+        ->except(['show']);
+    Route::post('jadwal/{doctorSchedule}/toggle-status', [DoctorScheduleController::class, 'toggleStatus'])
+        ->name('jadwal.toggle-status');
+});
+
+// PBI09: Pasien - Antrean Online
+Route::middleware(['auth', 'role:pasien'])->prefix('antrean')->name('antrean.')->group(function () {
+    Route::get('/', [QueueController::class, 'index'])->name('index');
+    Route::get('/ambil', [QueueController::class, 'create'])->name('create');
+    Route::post('/', [QueueController::class, 'store'])->name('store');
+    Route::get('/{queue}', [QueueController::class, 'show'])->name('show');
+});
 
 // PBI10: Pasien
 Route::prefix('konsultasi')

@@ -45,12 +45,18 @@ class KonsultasiSeeder extends Seeder
             foreach ($daftarDokter as $i => [$nama, $email, $poliIndex]) {
                 $user = User::firstOrCreate(
                     ['email' => $email],
-                    ['name' => $nama, 'password' => bcrypt('password'), 'role' => 'dokter', 'is_active' => true]
+                    [
+                        'name' => $nama,
+                        'no_hp' => '0812345678'.$i,
+                        'password' => bcrypt('password'),
+                        'role' => 'dokter',
+                        'is_active' => true,
+                    ]
                 );
 
                 $dokter = Doctor::firstOrCreate(
                     ['user_id' => $user->id],
-                    ['nomor_sip' => 'SIP-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT)]
+                    ['nomor_sip' => 'SIP-'.str_pad($i + 1, 4, '0', STR_PAD_LEFT)]
                 );
 
                 // dr. Andi praktik dari pagi sampai malam, dokter lain shift siang sampai malam
@@ -67,7 +73,13 @@ class KonsultasiSeeder extends Seeder
 
             $pasien = User::firstOrCreate(
                 ['email' => 'pasien@test.com'],
-                ['name' => 'Budi Santoso', 'password' => bcrypt('password'), 'role' => 'pasien', 'is_active' => true]
+                [
+                    'name' => 'Budi Santoso',
+                    'no_hp' => '089876543210',
+                    'password' => bcrypt('password'),
+                    'role' => 'pasien',
+                    'is_active' => true,
+                ]
             );
 
             PatientProfile::firstOrCreate(
