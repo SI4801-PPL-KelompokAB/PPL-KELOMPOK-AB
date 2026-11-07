@@ -4,6 +4,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DokterKonsultasiController;
 use App\Http\Controllers\KonsultasiOnlineController;
+use App\Http\Controllers\PatientProfileController;
 use App\Http\Controllers\RuangKonsultasiController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
@@ -76,4 +77,15 @@ Route::prefix('admin/akun')
 
         Route::post('/', [UserManagementController::class, 'store'])
             ->name('store');
+    });
+
+// PBI04: Pasien mengisi profil identitas
+Route::prefix('pasien/profil')
+    ->name('pasien.profil.')
+    ->group(function () {
+        Route::get('/', [PatientProfileController::class, 'edit'])
+            ->name('edit');
+
+        Route::put('/', [PatientProfileController::class, 'update'])
+            ->name('update');
     });
