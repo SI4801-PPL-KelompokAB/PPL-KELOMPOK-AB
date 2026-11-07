@@ -26,4 +26,19 @@ class PatientProfile extends Model
     {
         return $this->hasMany(Consultation::class);
     }
+
+    public function queues()
+    {
+        return $this->hasMany(Queue::class);
+    }
+
+    /**
+     * Memeriksa kelengkapan identitas profil pasien.
+     */
+    public function isLengkap(): bool
+    {
+        return ! empty($this->tanggal_lahir) &&
+               ! empty($this->jenis_kelamin) &&
+               ! empty(trim($this->alamat ?? ''));
+    }
 }
