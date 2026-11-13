@@ -13,17 +13,17 @@ class Poli extends Model
     use BelongsToCabang, HasFactory;
 
     protected $fillable = [
-        'cabang_id',
+        'klinik_cabang_id',
         'kode_poli',
         'nama_poli',
         'deskripsi',
-        'is_active',
+        'status',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_active' => 'boolean',
+            'status' => 'boolean',
         ];
     }
 
@@ -32,27 +32,19 @@ class Poli extends Model
     // ──────────────────────────────────────────
 
     /**
-     * Daftar dokter yang terdaftar di poli ini.
+     * Daftar jadwal dokter yang terdaftar di poli ini.
      */
-    public function dokters(): HasMany
+    public function doctorSchedules(): HasMany
     {
-        return $this->hasMany(Dokter::class);
+        return $this->hasMany(DoctorSchedule::class);
     }
 
     /**
-     * Daftar antrean yang merujuk ke poli ini.
+     * Daftar antrean yang merujuk ke poli ini melalui jadwal dokter.
      */
-    public function antreans(): HasMany
+    public function queues(): HasManyThrough
     {
-        return $this->hasMany(Antrean::class);
-    }
-
-    /**
-     * Jadwal praktik dokter yang terhubung dengan poli ini.
-     */
-    public function jadwalPraktiks(): HasManyThrough
-    {
-        return $this->hasManyThrough(JadwalPraktik::class, Dokter::class);
+        return $this->hasManyThrough(Queue::class, DoctorSchedule::class);
     }
 
     // ──────────────────────────────────────────
@@ -64,6 +56,6 @@ class Poli extends Model
      */
     public function scopeAktif($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('status', true);
     }
 }

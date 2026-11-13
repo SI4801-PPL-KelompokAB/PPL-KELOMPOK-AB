@@ -13,11 +13,19 @@ return new class extends Migration
     {
         Schema::create('polis', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_poli', 100)->unique();
-            $table->string('nama_poli', 100)->unique();
+
+            $table->foreignId('klinik_cabang_id')
+                ->constrained('klinik_cabang')
+                ->cascadeOnDelete();
+
+            $table->string('kode_poli', 20)->nullable();
+            $table->string('nama_poli', 100);
             $table->text('deskripsi')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->boolean('status')->default(true);
+
             $table->timestamps();
+
+            $table->unique(['klinik_cabang_id', 'nama_poli']);
         });
     }
 
