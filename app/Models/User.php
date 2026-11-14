@@ -33,6 +33,11 @@ class User extends Authenticatable
         ];
     }
 
+    // ──────────────────────────────────────────
+    // Helper role
+    // ──────────────────────────────────────────
+
+
     // Relasi akun dengan profil pasien
     public function patientProfile()
     {
