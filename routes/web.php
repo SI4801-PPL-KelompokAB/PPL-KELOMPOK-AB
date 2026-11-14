@@ -2,9 +2,11 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PetugasQueueController;
 use App\Http\Controllers\DokterKonsultasiController;
 use App\Http\Controllers\KonsultasiOnlineController;
 use App\Http\Controllers\RuangKonsultasiController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 // Halaman utama
@@ -28,6 +30,15 @@ Route::post('/login', [AuthController::class, 'login'])
 Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
+
+    // Dashboard berdasarkan role pengguna
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('dashboard');
+
+Route::patch('/petugas/antrean/{queue}/status', [PetugasQueueController::class, 'updateStatus'])
+    ->middleware('auth')
+    ->name('petugas.antrean.status');
 
 // PBI10: Pasien
 Route::prefix('konsultasi')
