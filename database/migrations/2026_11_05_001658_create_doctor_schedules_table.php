@@ -29,7 +29,7 @@ return new class extends Migration
                 'kamis',
                 'jumat',
                 'sabtu',
-                'minggu'
+                'minggu',
             ]);
 
             $table->time('jam_mulai');

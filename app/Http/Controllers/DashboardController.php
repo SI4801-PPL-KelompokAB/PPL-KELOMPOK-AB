@@ -11,19 +11,19 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
     public function index()
-{
-    $role = Auth::user()->role;
+    {
+        $role = Auth::user()->role;
 
-    return match ($role) {
-        'admin'   => $this->admin(),
-        'petugas' => $this->petugas(),
-        // Dokter dipakai untuk konsultasi online
-        'dokter'  => redirect()->route('dokter.konsultasi.index'),
-        // TODO: ganti ke redirect()->route('...home pasien...') kalau halaman home sudah ada
-        'pasien'  => view('patient.dashboard'),
-        default   => abort(403, 'Role tidak dikenali.'),
-    };
-}
+        return match ($role) {
+            'admin'   => $this->admin(),
+            'petugas' => $this->petugas(),
+            // Dokter dipakai untuk konsultasi online
+            'dokter'  => redirect()->route('dokter.konsultasi.index'),
+            // TODO: ganti ke redirect()->route('...home pasien...') kalau halaman home sudah ada
+            'pasien'  => view('patient.dashboard'),
+            default   => abort(403, 'Role tidak dikenali.'),
+        };
+    }
 
     private function admin()
     {
@@ -71,35 +71,39 @@ class DashboardController extends Controller
         }
 
         $latestQueues = Queue::with([
-                'patientProfile.user',
-                'doctorSchedule.doctor.user',
-                'doctorSchedule.poli.klinikCabang',
-            ])
+            'patientProfile.user',
+            'doctorSchedule.doctor.user',
+            'doctorSchedule.poli.klinikCabang',
+        ])
             ->latest()
             ->limit(10)
             ->get();
 
         return view('admin.dashboard', compact(
-            'stats', 'statusCounts', 'perPoli', 'chart', 'latestQueues'
+            'stats',
+            'statusCounts',
+            'perPoli',
+            'chart',
+            'latestQueues'
         ));
     }
 
     private function petugas()
     {
-        $statusCounts = Queue::today()
+        $statusCounts = Queue::whereDate('created_at', today())
             ->selectRaw('status, count(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
 
         // Jadwal dokter yang punya antrean hari ini
         $schedules = DoctorSchedule::with([
-                'doctor.user',
-                'poli.klinikCabang',
-                'queues' => fn ($q) => $q->today()
-                    ->with('patientProfile.user')
-                    ->orderBy('nomor_antrean'),
-            ])
-            ->whereHas('queues', fn ($q) => $q->today())
+            'doctor.user',
+            'poli.klinikCabang',
+            'queues' => fn($q) => $q->today()
+                ->with('patientProfile.user')
+                ->orderBy('nomor_antrean'),
+        ])
+            ->whereHas('queues', fn($q) => $q->today())
             ->get();
 
         return view('petugas.dashboard', compact('statusCounts', 'schedules'));
