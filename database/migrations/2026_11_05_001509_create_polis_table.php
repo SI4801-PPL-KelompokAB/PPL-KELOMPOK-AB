@@ -18,6 +18,7 @@ return new class extends Migration
                 ->constrained('klinik_cabang')
                 ->cascadeOnDelete();
 
+            $table->string('kode_poli', 20)->nullable();
             $table->string('nama_poli', 100);
             $table->text('deskripsi')->nullable();
             $table->boolean('status')->default(true);

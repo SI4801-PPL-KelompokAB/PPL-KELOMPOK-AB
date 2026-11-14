@@ -13,11 +13,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(KonsultasiSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Akun Admin untuk pengujian PBI-05 (Admin Poli)
+        User::firstOrCreate(
+            ['email' => 'admin@test.com'],
+            [
+                'name' => 'Admin Bonamu',
+                'no_hp' => '081234567890',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+                'is_active' => true,
+            ]
+        );
     }
 }

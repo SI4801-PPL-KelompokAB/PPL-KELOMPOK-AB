@@ -62,3 +62,9 @@ Route::prefix('dokter/konsultasi')
         Route::post('/{consultation}/selesai', [DokterKonsultasiController::class, 'selesai'])
             ->name('selesai');
     });
+
+// ──────────────────────────────────────────
+// Route per role (dipisah file supaya tidak bentrok)
+// ──────────────────────────────────────────
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')
+    ->group(base_path('routes/admin.php'));

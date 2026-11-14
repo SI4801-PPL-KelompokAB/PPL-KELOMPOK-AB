@@ -2,26 +2,60 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCabang;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Poli extends Model
 {
-    protected $table = 'polis';
+    use BelongsToCabang, HasFactory;
 
     protected $fillable = [
         'klinik_cabang_id',
+        'kode_poli',
         'nama_poli',
         'deskripsi',
-        'status'
+        'status',
     ];
 
-    public function klinikCabang()
+    protected function casts(): array
     {
-        return $this->belongsTo(KlinikCabang::class);
+        return [
+            'status' => 'boolean',
+        ];
     }
 
-    public function schedules()
+    // ──────────────────────────────────────────
+    // Relasi
+    // ──────────────────────────────────────────
+
+    /**
+     * Daftar jadwal dokter yang terdaftar di poli ini.
+     */
+    public function doctorSchedules(): HasMany
     {
         return $this->hasMany(DoctorSchedule::class);
+    }
+
+    /**
+     * Daftar antrean yang merujuk ke poli ini melalui jadwal dokter.
+     */
+    public function queues(): HasManyThrough
+    {
+        return $this->hasManyThrough(Queue::class, DoctorSchedule::class);
+    }
+
+    // ──────────────────────────────────────────
+    // Scope
+    // ──────────────────────────────────────────
+
+    /**
+     * Hanya poli yang aktif.
+     */
+    public function scopeAktif($query)
+    {
+        return $query->where('status', true);
     }
 }
