@@ -66,8 +66,4 @@ class Queue extends Model
             default => ucfirst($this->status),
         };
     }
-    public function scopeToday($query)
-{
-    return $query->whereDate('created_at', today());
-}
 }

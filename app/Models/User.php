@@ -37,6 +37,20 @@ class User extends Authenticatable
     // Helper role
     // ──────────────────────────────────────────
 
+    public function isPasien(): bool
+    {
+        return $this->role === 'pasien';
+    }
+
+    public function isDokter(): bool
+    {
+        return $this->role === 'dokter';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 
     // Relasi akun dengan profil pasien
     public function patientProfile()
@@ -48,20 +62,5 @@ class User extends Authenticatable
     public function doctor()
     {
         return $this->hasOne(Doctor::class);
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isDokter(): bool
-    {
-        return $this->role === 'dokter';
-    }
-
-    public function isPasien(): bool
-    {
-        return $this->role === 'pasien';
     }
 }

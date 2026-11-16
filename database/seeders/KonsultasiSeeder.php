@@ -54,11 +54,7 @@ class KonsultasiSeeder extends Seeder
                     ['email' => $email],
                     [
                         'name' => $nama,
-<<<<<<< HEAD
-                        'no_hp' => '0812345678'.$i,
-=======
                         'no_hp' => $noHp,
->>>>>>> origin/Ghassan_Branch
                         'password' => bcrypt('password'),
                         'role' => 'dokter',
                         'is_active' => true,
@@ -86,11 +82,7 @@ class KonsultasiSeeder extends Seeder
                 ['email' => 'pasien@test.com'],
                 [
                     'name' => 'Budi Santoso',
-<<<<<<< HEAD
-                    'no_hp' => '089876543210',
-=======
                     'no_hp' => '081299999999',
->>>>>>> origin/Ghassan_Branch
                     'password' => bcrypt('password'),
                     'role' => 'pasien',
                     'is_active' => true,

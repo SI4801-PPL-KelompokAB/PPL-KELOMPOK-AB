@@ -11,6 +11,8 @@ class PatientProfile extends Model
         'tanggal_lahir',
         'jenis_kelamin',
         'alamat',
+        'jenis_pasien',
+        'no_bpjs',
     ];
 
     protected $casts = [
@@ -37,8 +39,14 @@ class PatientProfile extends Model
      */
     public function isLengkap(): bool
     {
-        return ! empty($this->tanggal_lahir) &&
-               ! empty($this->jenis_kelamin) &&
-               ! empty(trim($this->alamat ?? ''));
+        if (empty($this->tanggal_lahir) || empty($this->jenis_kelamin) || empty(trim($this->alamat ?? ''))) {
+            return false;
+        }
+
+        if (! empty($this->jenis_pasien) && $this->jenis_pasien === 'BPJS') {
+            return ! empty($this->no_bpjs);
+        }
+
+        return true;
     }
 }
