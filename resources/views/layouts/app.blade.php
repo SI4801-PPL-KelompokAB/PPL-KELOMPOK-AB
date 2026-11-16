@@ -90,6 +90,16 @@
             font-size: 1.1rem;
         }
 
+        .top-bar-puskesmas {
+            background-color: #0e382f;
+            color: #ffffff;
+            font-size: 0.725rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 0.4rem 0;
+            text-transform: uppercase;
+        }
+
         .nav-pill-item {
             color: #4a5568;
             font-size: 0.875rem;
@@ -101,13 +111,13 @@
         }
 
         .nav-pill-item:hover {
-            color: var(--app-primary);
+            color: #005954;
             background-color: #f1f5f9;
         }
 
         .nav-pill-item.active {
-            background-color: var(--app-primary-light);
-            color: var(--app-primary);
+            background-color: #bbf0e1;
+            color: #0b4f3f;
             font-weight: 600;
         }
 
@@ -292,27 +302,35 @@
 </head>
 <body>
 
+{{-- Top Bar Sesuai Mockup --}}
+<div class="top-bar-puskesmas">
+    <div class="container-xl d-flex justify-content-between align-items-center">
+        <span>PUSKESMAS · SISTEM ANTREAN</span>
+        <span class="opacity-75 d-none d-md-inline" style="font-size: 0.7rem; letter-spacing: 0.05em; font-weight: 500;">PELAYANAN KESEHATAN TERPADU</span>
+    </div>
+</div>
+
 {{-- Header sesuai mockup --}}
 <header class="app-header">
     <div class="container-xl d-flex align-items-center justify-content-between">
         {{-- Logo Brand --}}
-        <a href="{{ route('admin.poli.index') }}" class="d-flex align-items-center gap-3 text-decoration-none">
+        <a href="{{ route('admin.layanan.index') }}" class="d-flex align-items-center gap-3 text-decoration-none">
             <div class="brand-logo-icon">
                 <i class="bi bi-hospital"></i>
             </div>
             <div>
-                <div class="fw-bold text-dark lh-sm" style="font-size: 1.15rem; letter-spacing: -0.02em;">Bonamu</div>
-                <div class="text-muted" style="font-size: 0.75rem;">Manajemen antrean &amp; informasi layanan</div>
+                <div class="fw-bold text-dark lh-sm" style="font-size: 1.15rem; letter-spacing: -0.02em;">Puskesmas</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Sistem Informasi &amp; Antrean Layanan</div>
             </div>
         </a>
 
-        {{-- Navigasi Menu --}}
+        {{-- Navigasi Menu Sesuai Mockup --}}
         <nav class="d-none d-md-flex align-items-center gap-2">
-            <a href="javascript:void(0)" onclick="tampilkanInfoModul('Daftar Antrean', 'PBI-14')" class="nav-pill-item">Daftar Antrean</a>
-            <a href="javascript:void(0)" onclick="tampilkanInfoModul('Input Manual', 'PBI-13')" class="nav-pill-item">Input Manual</a>
-            <a href="{{ route('admin.poli.index') }}" class="nav-pill-item active">Poli</a>
-            <a href="javascript:void(0)" onclick="tampilkanInfoModul('Jam Operasional Dokter', 'PBI-07')" class="nav-pill-item">Jam Operasional</a>
-            <a href="javascript:void(0)" onclick="tampilkanInfoModul('Kuota Antrean Dokter', 'PBI-07')" class="nav-pill-item">Kuota</a>
+            <a href="javascript:void(0)" onclick="tampilkanInfoModul('Antrean Puskesmas', 'PBI-09')" class="nav-pill-item">Antrean Puskesmas</a>
+            <a href="javascript:void(0)" onclick="tampilkanInfoModul('Status Antrean', 'PBI-17')" class="nav-pill-item">Status Antrean</a>
+            <a href="javascript:void(0)" onclick="tampilkanInfoModul('Jadwal Dokter', 'PBI-08')" class="nav-pill-item">Jadwal Dokter</a>
+            <a href="{{ route('admin.layanan.index') }}" class="nav-pill-item {{ request()->routeIs('admin.layanan.*') ? 'active' : '' }}">Layanan dan Tarif</a>
+            <a href="{{ route('admin.poli.index') }}" class="nav-pill-item {{ request()->routeIs('admin.poli.*') ? 'active' : '' }}">Poli</a>
         </nav>
 
         {{-- Profil & Action --}}
