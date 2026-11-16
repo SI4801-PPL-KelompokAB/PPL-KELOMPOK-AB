@@ -13,8 +13,18 @@ class DoctorSchedule extends Model
         'jam_mulai',
         'jam_selesai',
         'kuota',
-        'status'
+        'status',
     ];
+
+    protected $casts = [
+        'kuota' => 'integer',
+        'status' => 'boolean',
+    ];
+
+    public function scopeAktif($query)
+    {
+        return $query->where('status', true);
+    }
 
     public function doctor()
     {
