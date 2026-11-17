@@ -124,4 +124,17 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
                 ->assertSee('Ada Antrean Aktif');
         });
     }
+
+    /**
+     * Skenario 3 (Normal): Pasien melihat daftar antrean online miliknya.
+     */
+    public function test_pasien_bisa_melihat_daftar_antrean_miliknya(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/antrean')
+                ->pause(1200)
+                ->assertSee($this->poli->nama_poli)
+                ->assertSee($this->schedule->doctor->user->name);
+        });
+    }
 }
