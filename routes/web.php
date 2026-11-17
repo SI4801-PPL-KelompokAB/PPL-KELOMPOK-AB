@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\AdminQueueController;
+use App\Http\Controllers\Admin\CabangController;
 use App\Http\Controllers\Admin\PoliController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DoctorScheduleController;
@@ -9,10 +11,11 @@ use App\Http\Controllers\DokterKonsultasiController;
 use App\Http\Controllers\KonsultasiOnlineController;
 use App\Http\Controllers\Patient\PatientDashboardController;
 use App\Http\Controllers\PatientProfileController;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\QueueController;
 use App\Http\Controllers\RuangKonsultasiController;
 use App\Http\Controllers\UserManagementController;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Halaman utama (Portal Pengujian)
@@ -34,6 +37,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // ──────────────────────────────────────────
 Route::get('/dashboard', function () {
     $role = Auth::user()?->role;
+
     return match ($role) {
         'admin'  => redirect()->route('admin.dashboard'),
         'pasien' => redirect()->route('pasien.dashboard'),
@@ -53,10 +57,11 @@ Route::get('/dev/login-as/{role}', function (string $role) {
         default  => null,
     };
 
-    $user = \App\Models\User::where('email', $email)->orWhere('role', $role)->first();
+    $user = User::where('email', $email)->orWhere('role', $role)->first();
 
     if ($user) {
-        \Illuminate\Support\Facades\Auth::login($user);
+        Auth::login($user);
+
         return match ($role) {
             'admin'  => redirect()->route('admin.dashboard')->with('sukses', "Login instan berhasil sebagai Admin ({$user->name})"),
             'dokter' => redirect()->route('dokter.konsultasi.index')->with('success', "Login instan berhasil sebagai Dokter ({$user->name})"),
@@ -69,11 +74,15 @@ Route::get('/dev/login-as/{role}', function (string $role) {
 })->name('dev.login-as');
 
 // ──────────────────────────────────────────
-// Admin Routes (Dashboard, Poli, Jadwal, Profil, Akun)
+// Admin Routes (Dashboard, Antrean, Poli, Cabang, Jadwal, Profil)
 // ──────────────────────────────────────────
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard Admin
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Kelola Antrean Pasien
+    Route::get('/antrean', [AdminQueueController::class, 'index'])->name('antrean.index');
+    Route::patch('/antrean/{queue}/status', [AdminQueueController::class, 'updateStatus'])->name('antrean.update-status');
 
     // Profil Admin
     Route::get('/profil', [AdminProfileController::class, 'edit'])->name('profil.edit');
@@ -84,8 +93,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('poli/{poli}/toggle-status', [PoliController::class, 'toggleStatus'])->name('poli.toggle-status');
 
     // PBI-12 (Pengganti): Mengelola Data Cabang Klinik
-    Route::resource('cabang', \App\Http\Controllers\Admin\CabangController::class)->except(['show', 'destroy']);
-    Route::patch('cabang/{cabang}/toggle-status', [\App\Http\Controllers\Admin\CabangController::class, 'toggleStatus'])->name('cabang.toggle-status');
+    Route::resource('cabang', CabangController::class)->except(['show', 'destroy']);
+    Route::patch('cabang/{cabang}/toggle-status', [CabangController::class, 'toggleStatus'])->name('cabang.toggle-status');
 
     // PBI-07: Kelola Jadwal Praktik Dokter
     Route::resource('jadwal', DoctorScheduleController::class)
