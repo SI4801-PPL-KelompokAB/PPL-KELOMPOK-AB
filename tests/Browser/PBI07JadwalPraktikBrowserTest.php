@@ -98,4 +98,31 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
                 ->assertSee('bertabrakan');
         });
     }
+
+    /**
+     * Skenario 3 (Normal - Edit): Admin mengedit kuota jadwal praktik dokter yang sudah ada.
+     */
+    public function test_admin_bisa_mengedit_jadwal_praktik(): void
+    {
+        $jadwal = DoctorSchedule::firstOrCreate(
+            ['doctor_id' => $this->doctor->id, 'hari' => 'sabtu', 'poli_id' => $this->poli->id],
+            [
+                'jam_mulai' => '08:00:00',
+                'jam_selesai' => '12:00:00',
+                'kuota' => 20,
+                'status' => true,
+            ]
+        );
+
+        $this->browse(function (Browser $browser) use ($jadwal) {
+            $browser->visit('/admin/jadwal/'.$jadwal->id.'/edit')
+                ->pause(1000)
+                ->type('@input-kuota', '25')
+                ->pause(800)
+                ->click('@btn-update-jadwal')
+                ->pause(1500)
+                ->assertPathIs('/admin/jadwal')
+                ->assertSee('Jadwal praktik dokter berhasil diperbarui.');
+        });
+    }
 }
