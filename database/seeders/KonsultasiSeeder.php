@@ -26,28 +26,35 @@ class KonsultasiSeeder extends Seeder
                 ['alamat' => 'Jl. Contoh No. 1', 'nomor_telepon' => '0221234567', 'status' => true]
             );
 
-            $polis = collect(['Poli Umum', 'Poli Gigi', 'Poli Anak'])
-                ->map(fn ($nama) => Poli::firstOrCreate(
-                    ['klinik_cabang_id' => $cabang->id, 'nama_poli' => $nama],
-                    ['status' => true]
+            $polisData = [
+                ['nama_poli' => 'Poli Gigi dan Mulut', 'kode_poli' => 'PGT', 'deskripsi' => 'Layanan pemeriksaan dan perawatan gigi'],
+                ['nama_poli' => 'Poli Imunisasi', 'kode_poli' => 'IMN', 'deskripsi' => 'Layanan vaksinasi dan imunisasi rutin'],
+                ['nama_poli' => 'Poli KIA', 'kode_poli' => 'KIA', 'deskripsi' => 'Kesehatan ibu dan anak'],
+                ['nama_poli' => 'Poli Umum', 'kode_poli' => 'PU', 'deskripsi' => 'Pemeriksaan kesehatan umum'],
+            ];
+
+            $polis = collect($polisData)
+                ->map(fn ($p) => Poli::firstOrCreate(
+                    ['klinik_cabang_id' => $cabang->id, 'nama_poli' => $p['nama_poli']],
+                    ['kode_poli' => $p['kode_poli'], 'deskripsi' => $p['deskripsi'], 'status' => true]
                 ));
 
-            // [nama, email, index poli]
+            // [nama, email, no_hp, index poli]
             $daftarDokter = [
-                ['dr. Andi', 'dokter.andi@test.com', 0],
-                ['dr. Sari', 'dokter.sari@test.com', 0],
-                ['drg. Budi', 'dokter.budi@test.com', 1],
-                ['dr. Rina', 'dokter.rina@test.com', 2],
+                ['dr. Andi', 'dokter.andi@test.com', '081200000001', 0],
+                ['dr. Sari', 'dokter.sari@test.com', '081200000002', 0],
+                ['drg. Budi', 'dokter.budi@test.com', '081200000003', 1],
+                ['dr. Rina', 'dokter.rina@test.com', '081200000004', 2],
             ];
 
             $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
 
-            foreach ($daftarDokter as $i => [$nama, $email, $poliIndex]) {
+            foreach ($daftarDokter as $i => [$nama, $email, $noHp, $poliIndex]) {
                 $user = User::firstOrCreate(
                     ['email' => $email],
                     [
                         'name' => $nama,
-                        'no_hp' => '0812345678'.$i,
+                        'no_hp' => $noHp,
                         'password' => bcrypt('password'),
                         'role' => 'dokter',
                         'is_active' => true,
@@ -75,7 +82,7 @@ class KonsultasiSeeder extends Seeder
                 ['email' => 'pasien@test.com'],
                 [
                     'name' => 'Budi Santoso',
-                    'no_hp' => '089876543210',
+                    'no_hp' => '081299999999',
                     'password' => bcrypt('password'),
                     'role' => 'pasien',
                     'is_active' => true,

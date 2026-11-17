@@ -9,16 +9,14 @@ use Symfony\Component\HttpFoundation\Response;
 class EnsureRole
 {
     /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
+     * Pastikan user memiliki role yang sesuai.
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         $user = $request->user();
 
         if (! $user || ! $user->is_active || ! in_array($user->role, $roles, true)) {
-            abort(403, 'Akses tidak diizinkan untuk peran ini.');
+            abort(403);
         }
 
         return $next($request);

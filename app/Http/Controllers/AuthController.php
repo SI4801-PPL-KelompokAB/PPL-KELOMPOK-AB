@@ -127,8 +127,8 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended('/')
-            ->with('success', 'Login berhasil. Selamat datang!');
+        return redirect()->route('dashboard')
+    ->with('success', 'Login berhasil. Selamat datang!');
     }
 
     /**
