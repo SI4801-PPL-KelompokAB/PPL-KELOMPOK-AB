@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -290,149 +291,157 @@
     </style>
     @stack('styles')
 </head>
+
 <body>
 
-{{-- Header sesuai mockup --}}
-<header class="app-header">
-    <div class="container-xl d-flex align-items-center justify-content-between">
-        {{-- Logo Brand --}}
-        <a href="{{ url('/') }}" class="d-flex align-items-center gap-3 text-decoration-none">
-            <div class="brand-logo-icon">
-                <i class="bi bi-hospital"></i>
-            </div>
-            <div>
-                <div class="fw-bold text-dark lh-sm" style="font-size: 1.15rem; letter-spacing: -0.02em;">Bonamu</div>
-                <div class="text-muted" style="font-size: 0.75rem;">Manajemen antrean &amp; informasi layanan</div>
-            </div>
-        </a>
+    {{-- Header sesuai mockup --}}
+    <header class="app-header">
+        <div class="container-xl d-flex align-items-center justify-content-between">
+            {{-- Logo Brand --}}
+            <a href="{{ url('/') }}" class="d-flex align-items-center gap-3 text-decoration-none">
+                <div class="brand-logo-icon">
+                    <i class="bi bi-hospital"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark lh-sm" style="font-size: 1.15rem; letter-spacing: -0.02em;">Bonamu</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Manajemen antrean &amp; informasi layanan</div>
+                </div>
+            </a>
 
-        {{-- Navigasi Menu Dinamis Sesuai Role --}}
-        <nav class="d-none d-md-flex align-items-center gap-1">
-            @auth
+            {{-- Navigasi Menu Dinamis Sesuai Role --}}
+            <nav class="d-none d-md-flex align-items-center gap-1">
+                @auth
                 @if(auth()->user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="nav-pill-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-grid-fill me-1"></i> Dashboard
-                    </a>
-                    <a href="{{ route('admin.poli.index') }}" class="nav-pill-item {{ request()->routeIs('admin.poli.*') ? 'active' : '' }}">
-                        <i class="bi bi-diagram-3 me-1"></i> Data Poli
-                    </a>
-                    <a href="{{ route('admin.cabang.index') }}" class="nav-pill-item {{ request()->routeIs('admin.cabang.*') ? 'active' : '' }}">
-                        <i class="bi bi-buildings me-1"></i> Cabang
-                    </a>
-                    <a href="{{ route('admin.jadwal.index') }}" class="nav-pill-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
-                        <i class="bi bi-calendar-week me-1"></i> Jadwal Dokter
-                    </a>
-                    <a href="{{ route('admin.akun.index') }}" class="nav-pill-item {{ request()->routeIs('admin.akun.*') ? 'active' : '' }}">
-                        <i class="bi bi-people me-1"></i> Akun Staf
-                    </a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-pill-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-fill me-1"></i> Dashboard
+                </a>
+                <a href="{{ route('admin.poli.index') }}" class="nav-pill-item {{ request()->routeIs('admin.poli.*') ? 'active' : '' }}">
+                    <i class="bi bi-diagram-3 me-1"></i> Data Poli
+                </a>
+                <a href="{{ route('admin.cabang.index') }}" class="nav-pill-item {{ request()->routeIs('admin.cabang.*') ? 'active' : '' }}">
+                    <i class="bi bi-buildings me-1"></i> Cabang
+                </a>
+                <a href="{{ route('admin.jadwal.index') }}" class="nav-pill-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar-week me-1"></i> Jadwal Dokter
+                </a>
+                <a href="{{ route('admin.akun.index') }}" class="nav-pill-item {{ request()->routeIs('admin.akun.*') ? 'active' : '' }}">
+                    <i class="bi bi-people me-1"></i> Akun Staf
+                </a>
+                <a href="{{ route('admin.antrean.index') }}" class="nav-pill-item {{ request()->routeIs('admin.antrean.*') ? 'active' : '' }}">
+        <i class="bi bi-ticket-detailed me-1"></i> Antrean
+    </a>
                 @elseif(auth()->user()->role === 'pasien')
-                    <a href="{{ route('pasien.dashboard') }}" class="nav-pill-item {{ request()->routeIs('pasien.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-grid-fill me-1"></i> Dashboard
-                    </a>
-                    <a href="{{ route('antrean.create') }}" class="nav-pill-item {{ request()->routeIs('antrean.create') ? 'active' : '' }}">
-                        <i class="bi bi-ticket-perforated me-1"></i> Ambil Antrean
-                    </a>
-                    <a href="{{ route('antrean.index') }}" class="nav-pill-item {{ request()->routeIs('antrean.index') || request()->routeIs('antrean.show') ? 'active' : '' }}">
-                        <i class="bi bi-card-checklist me-1"></i> Antrean Saya
-                    </a>
-                    <a href="{{ route('pasien.profil.edit') }}" class="nav-pill-item {{ request()->routeIs('pasien.profil.*') ? 'active' : '' }}">
-                        <i class="bi bi-person-lines-fill me-1"></i> Profil Pasien
-                    </a>
-                    <a href="{{ route('konsultasi.create') }}" class="nav-pill-item {{ request()->routeIs('konsultasi.*') ? 'active' : '' }}">
-                        <i class="bi bi-chat-dots me-1"></i> Konsultasi
-                    </a>
+                <a href="{{ route('pasien.dashboard') }}" class="nav-pill-item {{ request()->routeIs('pasien.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-fill me-1"></i> Dashboard
+                </a>
+                <a href="{{ route('antrean.create') }}" class="nav-pill-item {{ request()->routeIs('antrean.create') ? 'active' : '' }}">
+                    <i class="bi bi-ticket-perforated me-1"></i> Ambil Antrean
+                </a>
+                <a href="{{ route('antrean.index') }}" class="nav-pill-item {{ request()->routeIs('antrean.index') || request()->routeIs('antrean.show') ? 'active' : '' }}">
+                    <i class="bi bi-card-checklist me-1"></i> Antrean Saya
+                </a>
+                <a href="{{ route('pasien.profil.edit') }}" class="nav-pill-item {{ request()->routeIs('pasien.profil.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-lines-fill me-1"></i> Profil Pasien
+                </a>
+                <a href="{{ route('konsultasi.create') }}" class="nav-pill-item {{ request()->routeIs('konsultasi.*') ? 'active' : '' }}">
+                    <i class="bi bi-chat-dots me-1"></i> Konsultasi
+                </a>
                 @elseif(auth()->user()->role === 'dokter')
-                    <a href="{{ route('dokter.konsultasi.index') }}" class="nav-pill-item {{ request()->routeIs('dokter.konsultasi.*') ? 'active' : '' }}">
-                        <i class="bi bi-clipboard2-pulse me-1"></i> Konsultasi Masuk
-                    </a>
+                <a href="{{ route('dokter.konsultasi.index') }}" class="nav-pill-item {{ request()->routeIs('dokter.konsultasi.*') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard2-pulse me-1"></i> Konsultasi Masuk
+                </a>
                 @endif
-            @else
+                @else
                 <a href="{{ url('/') }}" class="nav-pill-item {{ request()->is('/') ? 'active' : '' }}">Portal Testing</a>
                 <a href="{{ route('login') }}" class="nav-pill-item {{ request()->routeIs('login') ? 'active' : '' }}">Login</a>
                 <a href="{{ route('register') }}" class="nav-pill-item {{ request()->routeIs('register') ? 'active' : '' }}">Register Pasien</a>
-            @endauth
-        </nav>
+                @endauth
+            </nav>
 
-        {{-- Profil & Action --}}
-        <div class="d-flex align-items-center gap-2">
-            {{-- Quick Role Switcher untuk Testing --}}
-            <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill px-2 px-md-3" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Ganti Role Cepat">
-                    <i class="bi bi-arrow-repeat me-1 text-primary"></i> <span class="d-none d-sm-inline">Switch Role</span>
+            {{-- Profil & Action --}}
+            <div class="d-flex align-items-center gap-2">
+                {{-- Quick Role Switcher untuk Testing --}}
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill px-2 px-md-3" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Ganti Role Cepat">
+                        <i class="bi bi-arrow-repeat me-1 text-primary"></i> <span class="d-none d-sm-inline">Switch Role</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="font-size: 0.85rem; min-width: 240px;">
+                        <li>
+                            <h6 class="dropdown-header text-uppercase fw-bold text-primary">1-Click Test Login</h6>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 {{ auth()->check() && auth()->user()->role === 'admin' ? 'active bg-light text-dark fw-bold' : '' }}" href="{{ route('dev.login-as', 'admin') }}">
+                                👨‍💼 <strong>Admin</strong> <small class="text-muted d-block">admin@test.com</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 {{ auth()->check() && auth()->user()->role === 'dokter' ? 'active bg-light text-dark fw-bold' : '' }}" href="{{ route('dev.login-as', 'dokter') }}">
+                                👨‍⚕️ <strong>Dokter (dr. Andi)</strong> <small class="text-muted d-block">dokter.andi@test.com</small>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 {{ auth()->check() && auth()->user()->role === 'pasien' ? 'active bg-light text-dark fw-bold' : '' }}" href="{{ route('dev.login-as', 'pasien') }}">
+                                🧑‍🦽 <strong>Pasien (Budi)</strong> <small class="text-muted d-block">pasien@test.com</small>
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 text-primary" href="{{ url('/') }}">
+                                <i class="bi bi-grid-fill me-1"></i> <strong>Kembali ke Portal Testing</strong>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <button type="button" id="btnDarkMode" class="btn btn-sm btn-light rounded-circle text-muted" title="Mode gelap/terang">
+                    <i class="bi bi-moon"></i>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="font-size: 0.85rem; min-width: 240px;">
-                    <li><h6 class="dropdown-header text-uppercase fw-bold text-primary">1-Click Test Login</h6></li>
-                    <li>
-                        <a class="dropdown-item py-2 {{ auth()->check() && auth()->user()->role === 'admin' ? 'active bg-light text-dark fw-bold' : '' }}" href="{{ route('dev.login-as', 'admin') }}">
-                            👨‍💼 <strong>Admin</strong> <small class="text-muted d-block">admin@test.com</small>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item py-2 {{ auth()->check() && auth()->user()->role === 'dokter' ? 'active bg-light text-dark fw-bold' : '' }}" href="{{ route('dev.login-as', 'dokter') }}">
-                            👨‍⚕️ <strong>Dokter (dr. Andi)</strong> <small class="text-muted d-block">dokter.andi@test.com</small>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item py-2 {{ auth()->check() && auth()->user()->role === 'pasien' ? 'active bg-light text-dark fw-bold' : '' }}" href="{{ route('dev.login-as', 'pasien') }}">
-                            🧑‍🦽 <strong>Pasien (Budi)</strong> <small class="text-muted d-block">pasien@test.com</small>
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <a class="dropdown-item py-2 text-primary" href="{{ url('/') }}">
-                            <i class="bi bi-grid-fill me-1"></i> <strong>Kembali ke Portal Testing</strong>
-                        </a>
-                    </li>
-                </ul>
-            </div>
 
-            <button type="button" id="btnDarkMode" class="btn btn-sm btn-light rounded-circle text-muted" title="Mode gelap/terang">
-                <i class="bi bi-moon"></i>
-            </button>
-
-            @auth
+                @auth
                 @if(auth()->user()->role === 'admin')
-                    <a href="{{ route('admin.profil.edit') }}" class="user-badge d-none d-sm-inline-flex text-decoration-none text-dark" title="Buka Profil Admin">
-                        <span>{{ auth()->user()->name }}</span>
-                        <span class="admin-pill">ADMIN</span>
-                    </a>
+                <a href="{{ route('admin.profil.edit') }}" class="user-badge d-none d-sm-inline-flex text-decoration-none text-dark" title="Buka Profil Admin">
+                    <span>{{ auth()->user()->name }}</span>
+                    <span class="admin-pill">ADMIN</span>
+                </a>
                 @elseif(auth()->user()->role === 'pasien')
-                    <a href="{{ route('pasien.profil.edit') }}" class="user-badge d-none d-sm-inline-flex text-decoration-none text-dark" title="Buka Profil Pasien">
-                        <span>{{ auth()->user()->name }}</span>
-                        <span class="badge bg-primary-subtle text-primary border px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">PASIEN</span>
-                    </a>
+                <a href="{{ route('pasien.profil.edit') }}" class="user-badge d-none d-sm-inline-flex text-decoration-none text-dark" title="Buka Profil Pasien">
+                    <span>{{ auth()->user()->name }}</span>
+                    <span class="badge bg-primary-subtle text-primary border px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">PASIEN</span>
+                </a>
                 @else
-                    <div class="user-badge d-none d-sm-inline-flex">
-                        <span>{{ auth()->user()->name }}</span>
-                        <span class="admin-pill">{{ strtoupper(auth()->user()->role ?? 'USER') }}</span>
-                    </div>
+                <div class="user-badge d-none d-sm-inline-flex">
+                    <span>{{ auth()->user()->name }}</span>
+                    <span class="admin-pill">{{ strtoupper(auth()->user()->role ?? 'USER') }}</span>
+                </div>
                 @endif
 
                 <form method="POST" action="{{ route('logout') }}" class="d-inline m-0">
                     @csrf
                     <button type="submit" class="btn-keluar">Keluar</button>
                 </form>
-            @else
+                @else
                 <a href="{{ route('login') }}" class="btn btn-sm btn-primary rounded-pill px-3">Masuk</a>
-            @endauth
+                @endauth
+            </div>
         </div>
+    </header>
+
+    {{-- Sub-bar kecil --}}
+    <div class="container-xl py-2 d-flex justify-content-between align-items-center">
+        <small class="text-muted" style="font-size: 0.8rem;">
+            Sistem Bonamu &rsaquo; <strong>@yield('title', 'Dashboard')</strong>
+        </small>
+        <small class="badge bg-light text-secondary border px-2 py-1">
+            Cabang: {{ auth()->check() && auth()->user()->cabang ? auth()->user()->cabang->nama_cabang : 'Klinik Bonamu Pusat' }}
+        </small>
     </div>
-</header>
 
-{{-- Sub-bar kecil --}}
-<div class="container-xl py-2 d-flex justify-content-between align-items-center">
-    <small class="text-muted" style="font-size: 0.8rem;">
-        Sistem Bonamu &rsaquo; <strong>@yield('title', 'Dashboard')</strong>
-    </small>
-    <small class="badge bg-light text-secondary border px-2 py-1">
-        Cabang: {{ auth()->check() && auth()->user()->cabang ? auth()->user()->cabang->nama_cabang : 'Klinik Bonamu Pusat' }}
-    </small>
-</div>
-
-{{-- Main Content --}}
-<main class="container-xl mb-5 flex-grow-1">
-    {{-- Pesan Flash Sukses --}}
-    @if(session('sukses') || session('success'))
+    {{-- Main Content --}}
+    <main class="container-xl mb-5 flex-grow-1">
+        {{-- Pesan Flash Sukses --}}
+        @if(session('sukses') || session('success'))
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-3" role="alert" dusk="alert-sukses">
             <div class="d-flex align-items-center">
                 <i class="bi bi-check-circle-fill me-2 fs-5"></i>
@@ -440,10 +449,10 @@
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+        @endif
 
-    {{-- Pesan Error Validasi --}}
-    @if($errors->any())
+        {{-- Pesan Error Validasi --}}
+        @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 mb-3" role="alert" dusk="alert-error">
             <div class="d-flex align-items-center">
                 <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
@@ -451,56 +460,57 @@
                     <strong>Terdapat kesalahan pada input:</strong>
                     <ul class="mb-0 mt-1 ps-3">
                         @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
+                        <li>{{ $error }}</li>
                         @endforeach
                     </ul>
                 </div>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+        @endif
 
-    @yield('content')
-</main>
+        @yield('content')
+    </main>
 
-{{-- Footer sesuai mockup --}}
-<footer class="app-footer">
-    <div class="container-xl d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-        <div>
-            Sistem Manajemen Antrean Bonamu — pengelolaan antrean &amp; informasi layanan, bukan layanan medis.
+    {{-- Footer sesuai mockup --}}
+    <footer class="app-footer">
+        <div class="container-xl d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+            <div>
+                Sistem Manajemen Antrean Bonamu — pengelolaan antrean &amp; informasi layanan, bukan layanan medis.
+            </div>
+            <div>
+                Papan antrean publik: <a href="javascript:void(0)" onclick="tampilkanInfoModul('Papan Antrean Publik', 'PBI-17')" class="text-decoration-underline text-muted">lihat papan</a>
+            </div>
         </div>
-        <div>
-            Papan antrean publik: <a href="javascript:void(0)" onclick="tampilkanInfoModul('Papan Antrean Publik', 'PBI-17')" class="text-decoration-underline text-muted">lihat papan</a>
-        </div>
-    </div>
-</footer>
+    </footer>
 
-{{-- Bootstrap 5 JS --}}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- Bootstrap 5 JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-    // Fitur Dark Mode Toggle
-    const btnDarkMode = document.getElementById('btnDarkMode');
-    if (btnDarkMode) {
-        btnDarkMode.addEventListener('click', function () {
-            document.body.classList.toggle('dark-mode');
-            const icon = this.querySelector('i');
-            if (document.body.classList.contains('dark-mode')) {
-                icon.classList.remove('bi-moon');
-                icon.classList.add('bi-sun');
-            } else {
-                icon.classList.remove('bi-sun');
-                icon.classList.add('bi-moon');
-            }
-        });
-    }
+    <script>
+        // Fitur Dark Mode Toggle
+        const btnDarkMode = document.getElementById('btnDarkMode');
+        if (btnDarkMode) {
+            btnDarkMode.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.classList.remove('bi-moon');
+                    icon.classList.add('bi-sun');
+                } else {
+                    icon.classList.remove('bi-sun');
+                    icon.classList.add('bi-moon');
+                }
+            });
+        }
 
-    // Modal/Toast interaktif jika menu modul tim lain diklik
-    function tampilkanInfoModul(namaModul, kodePbi) {
-        alert('Fitur ' + namaModul + ' (' + kodePbi + ') adalah tanggung jawab modul lain dan saat ini sedang dalam pengerjaan oleh anggota tim terkait.');
-    }
-</script>
+        // Modal/Toast interaktif jika menu modul tim lain diklik
+        function tampilkanInfoModul(namaModul, kodePbi) {
+            alert('Fitur ' + namaModul + ' (' + kodePbi + ') adalah tanggung jawab modul lain dan saat ini sedang dalam pengerjaan oleh anggota tim terkait.');
+        }
+    </script>
 
-@stack('scripts')
+    @stack('scripts')
 </body>
+
 </html>
