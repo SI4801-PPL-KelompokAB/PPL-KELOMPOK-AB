@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Admin Bonamu',
                 'no_hp' => '081234567890',
-                'password' => bcrypt('password'),
+                'password' => bcrypt('password123'),
                 'role' => 'admin',
                 'is_active' => true,
             ]
