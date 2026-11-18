@@ -137,9 +137,16 @@ Route::middleware(['auth', 'role:pasien'])->group(function () {
         Route::get('/buat', [KonsultasiOnlineController::class, 'create'])->name('create');
         Route::post('/', [KonsultasiOnlineController::class, 'store'])->name('store');
         Route::get('/{consultation}', [KonsultasiOnlineController::class, 'show'])->name('show');
-        Route::get('/{consultation}/ruang', [RuangKonsultasiController::class, 'show'])->name('ruang');
-        Route::post('/{consultation}/pesan', [RuangKonsultasiController::class, 'kirim'])->name('pesan');
     });
+});
+
+// ──────────────────────────────────────────
+// Ruang Konsultasi (PBI-10 & PBI-11): dipakai pasien dan dokter
+// Hak akses per konsultasi dicek di RuangKonsultasiController
+// ──────────────────────────────────────────
+Route::middleware('auth')->prefix('konsultasi')->name('konsultasi.')->group(function () {
+    Route::get('/{consultation}/ruang', [RuangKonsultasiController::class, 'show'])->name('ruang');
+    Route::post('/{consultation}/pesan', [RuangKonsultasiController::class, 'kirim'])->name('pesan');
 });
 
 // ──────────────────────────────────────────
