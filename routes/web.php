@@ -3,7 +3,7 @@
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminQueueController;
-use App\Http\Controllers\Admin\CabangController;
+use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Admin\PoliController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DoctorScheduleController;
@@ -94,9 +94,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('poli', PoliController::class)->except(['show', 'destroy']);
     Route::patch('poli/{poli}/toggle-status', [PoliController::class, 'toggleStatus'])->name('poli.toggle-status');
 
-    // PBI-12 (Pengganti): Mengelola Data Cabang Klinik
-    Route::resource('cabang', CabangController::class)->except(['show', 'destroy']);
-    Route::patch('cabang/{cabang}/toggle-status', [CabangController::class, 'toggleStatus'])->name('cabang.toggle-status');
+    // PBI-12: Mengelola Master Data Layanan dan Tarif
+    Route::resource('layanan', LayananController::class)->except(['show', 'destroy']);
+    Route::patch('layanan/{layanan}/toggle-status', [LayananController::class, 'toggleStatus'])->name('layanan.toggle-status');
 
     // PBI-07: Kelola Jadwal Praktik Dokter
     Route::resource('jadwal', DoctorScheduleController::class)

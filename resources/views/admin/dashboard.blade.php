@@ -20,8 +20,8 @@
                 <a href="{{ route('admin.antrean.index') }}" class="btn btn-warning btn-sm fw-bold text-dark rounded-pill px-3 py-2">
                     <i class="bi bi-ticket-detailed-fill me-1"></i> Kelola Antrean
                 </a>
-                <a href="{{ route('admin.cabang.index') }}" class="btn btn-outline-light btn-sm fw-semibold rounded-pill px-3 py-2">
-                    <i class="bi bi-buildings me-1"></i> Data Cabang
+                <a href="{{ route('admin.layanan.index') }}" class="btn btn-outline-light btn-sm fw-semibold rounded-pill px-3 py-2">
+                    <i class="bi bi-tag me-1"></i> Layanan &amp; Tarif
                 </a>
                 <a href="{{ route('admin.poli.create') }}" class="btn btn-light btn-sm fw-semibold rounded-pill px-3 py-2">
                     <i class="bi bi-plus-circle-fill text-success me-1"></i> Tambah Poli
@@ -38,22 +38,22 @@
 
     {{-- Kartu Metrik Statistik --}}
     <div class="row g-3 mb-4">
-        {{-- Cabang Klinik --}}
+        {{-- Layanan & Tarif --}}
         <div class="col-sm-6 col-xl">
             <div class="card-mockup h-100 p-3">
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted small fw-semibold text-uppercase">Cabang Klinik</span>
+                    <span class="text-muted small fw-semibold text-uppercase">Layanan &amp; Tarif</span>
                     <div class="rounded-3 p-2 bg-info-subtle text-info">
-                        <i class="bi bi-buildings fs-5"></i>
+                        <i class="bi bi-tag fs-5"></i>
                     </div>
                 </div>
                 <div class="d-flex align-items-baseline gap-2">
-                    <h2 class="fw-bold text-dark mb-0">{{ $totalCabang }}</h2>
-                    <small class="text-muted">Cabang</small>
+                    <h2 class="fw-bold text-dark mb-0">{{ $totalLayanan }}</h2>
+                    <small class="text-muted">Daftar Tarif</small>
                 </div>
                 <div class="mt-3 pt-2 border-top">
-                    <a href="{{ route('admin.cabang.index') }}" class="small text-decoration-none fw-semibold text-info">
-                        Kelola Cabang <i class="bi bi-arrow-right"></i>
+                    <a href="{{ route('admin.layanan.index') }}" class="small text-decoration-none fw-semibold text-info">
+                        Kelola Tarif <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
