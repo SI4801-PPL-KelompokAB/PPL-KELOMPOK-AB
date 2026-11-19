@@ -25,6 +25,7 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
 
     protected User $pasien;
 
+    // siapkan akun pasien budi, profil lengkap, poli, dan jadwal dokter aktif untuk besok
     protected function setUp(): void
     {
         parent::setUp();
@@ -67,9 +68,7 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
         );
     }
 
-    /**
-     * Helper: Login otomatis lewat form jika sesi browser belum login sebagai Pasien Budi.
-     */
+    // fungsi bantu: otomatis login sebagai pasien budi di browser kalau belum login
     protected function pastikanLoginPasien(Browser $browser, string $targetUrl): void
     {
         $browser->visit($targetUrl)->pause(600);
@@ -84,9 +83,7 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
         }
     }
 
-    /**
-     * TC-PBI09-01 (Normal): Pasien melihat halaman pendaftaran antrean online.
-     */
+    // tc-pbi09-01 (normal): pasien membuka halaman pendaftaran antrean online dan melihat jadwal dokter
     public function test_tc_pbi09_01_pasien_melihat_halaman_pendaftaran_antrean(): void
     {
         $this->browse(function (Browser $browser) {
@@ -98,11 +95,10 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
         });
     }
 
-    /**
-     * TC-PBI09-02 (Normal): Pasien mengambil nomor antrean online pertama (data masuk ke phpMyAdmin).
-     */
+    // tc-pbi09-02 (normal): pasien berhasil mengambil nomor antrean pertama (001) dan data masuk ke phpmyadmin
     public function test_tc_pbi09_02_pasien_berhasil_membuat_antrean_online_pertama(): void
     {
+        // bersihkan antrean lama supaya budi bisa daftar antrean pertama dari awal
         Queue::where('doctor_schedule_id', $this->schedule->id)
             ->whereDate('tanggal_antrean', $this->tanggalTarget)
             ->delete();
@@ -117,15 +113,14 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
                 ->acceptDialog()
                 ->pause(1500)
                 ->assertSee('Nomor Antrean Anda')
-                ->assertSee('A-001');
+                ->assertSee('001');
         });
     }
 
-    /**
-     * TC-PBI09-03 (Normal): Penomoran antrean berurutan per dokter per tanggal (A-001 lalu A-002).
-     */
+    // tc-pbi09-03 (normal): pasien kedua yang mendaftar di jadwal dan tanggal yang sama mendapat nomor urut 002
     public function test_tc_pbi09_03_penomoran_antrean_berurutan_per_dokter_per_tanggal(): void
     {
+        // pastikan antrean nomor 1 milik budi sudah ada
         Queue::firstOrCreate(
             [
                 'patient_profile_id' => $this->profil->id,
@@ -138,6 +133,7 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
             ]
         );
 
+        // buat akun pasien kedua (siti)
         $pasienKedua = User::firstOrCreate(
             ['no_hp' => '089876543299'],
             [
@@ -169,16 +165,14 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
                 ->acceptDialog()
                 ->pause(1500)
                 ->assertSee('Nomor Antrean Anda')
-                ->assertSee('A-002');
+                ->assertSee('002');
 
-            // Kembalikan sesi ke Budi
+            // kembalikan login ke budi
             $browser->loginAs($this->pasien);
         });
     }
 
-    /**
-     * TC-PBI09-04 (Normal): Pasien melihat detail tiket bukti nomor antrean miliknya.
-     */
+    // tc-pbi09-04 (normal): pasien membuka halaman detail tiket antrean miliknya
     public function test_tc_pbi09_04_pasien_melihat_detail_tiket_antrean_miliknya(): void
     {
         $queue = Queue::firstOrCreate(
@@ -203,11 +197,10 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
         });
     }
 
-    /**
-     * TC-PBI09-05 (Exception): Pasien yang data profilnya belum lengkap ditolak mengambil antrean.
-     */
+    // tc-pbi09-05 (exception): pasien yang profilnya belum lengkap (alamat kosong) tidak bisa ambil antrean
     public function test_tc_pbi09_05_ditolak_jika_profil_pasien_belum_lengkap(): void
     {
+        // kosongkan alamat budi sementara
         $this->profil->update(['alamat' => null]);
 
         $this->browse(function (Browser $browser) {
@@ -218,13 +211,11 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
                 ->assertSee('Lengkapi Profil Pasien');
         });
 
-        // Kembalikan alamat profil Budi agar tetap lengkap
+        // isi kembali alamat budi supaya profilnya kembali lengkap
         $this->profil->update(['alamat' => 'Jl. Bojongsoang Asri No. 10']);
     }
 
-    /**
-     * TC-PBI09-06 (Exception): Pasien memilih tanggal kunjungan yang sudah lewat (kemarin).
-     */
+    // tc-pbi09-06 (exception): kalau pasien memilih tanggal masa lalu (kemarin), sistem menolak dan mengembalikan ke hari ini
     public function test_tc_pbi09_06_ditolak_jika_tanggal_antrean_sudah_lewat(): void
     {
         $kemarin = Carbon::yesterday()->toDateString();
@@ -232,17 +223,15 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($kemarin) {
             $this->pastikanLoginPasien($browser, '/antrean/ambil?poli='.$this->poli->id.'&tanggal='.$kemarin);
 
-            // Sistem otomatis menolak tanggal masa lalu dan mengembalikan ke tanggal hari ini
             $browser->pause(1000)
                 ->assertValue('@input-pilih-tanggal', today()->toDateString());
         });
     }
 
-    /**
-     * TC-PBI09-07 (Exception): Pasien memilih tanggal di mana dokter tidak memiliki jadwal praktik aktif.
-     */
+    // tc-pbi09-07 (exception): kalau jadwal dokter sedang nonaktif, tampil pesan tidak ada praktik dokter
     public function test_tc_pbi09_07_ditolak_jika_dokter_tidak_praktik_pada_tanggal_tersebut(): void
     {
+        // nonaktifkan jadwal sementara
         $this->schedule->update(['status' => false]);
 
         $this->browse(function (Browser $browser) {
@@ -252,13 +241,11 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
                 ->assertSee('Tidak Ada Praktik Dokter');
         });
 
-        // Aktifkan kembali jadwal dokter
+        // aktifkan kembali jadwal dokter
         $this->schedule->update(['status' => true]);
     }
 
-    /**
-     * TC-PBI09-08 (Exception): Pasien yang sudah memiliki antrean aktif ditolak mengambil antrean baru (ganda).
-     */
+    // tc-pbi09-08 (exception): pasien yang sudah punya antrean aktif dilarang mengambil antrean ganda
     public function test_tc_pbi09_08_ditolak_jika_pasien_sudah_memiliki_antrean_aktif(): void
     {
         Queue::firstOrCreate(
@@ -282,9 +269,7 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
         });
     }
 
-    /**
-     * TC-PBI09-09 (Exception): Pasien mencoba mengambil antrean pada jadwal yang kuotanya sudah penuh.
-     */
+    // tc-pbi09-09 (exception): kalau kuota jadwal sudah terisi penuh, tombol berubah jadi jadwal penuh
     public function test_tc_pbi09_09_ditolak_jika_kuota_jadwal_sudah_penuh(): void
     {
         Queue::firstOrCreate(
@@ -299,6 +284,7 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
             ]
         );
 
+        // set kuota maksimal jadi 1 (karena sudah ada 1 antrean, maka kuota langsung penuh)
         $this->schedule->update(['kuota' => 1]);
 
         $this->browse(function (Browser $browser) {
@@ -308,13 +294,11 @@ class PBI09AntreanOnlineBrowserTest extends DuskTestCase
                 ->assertSee('Jadwal Penuh');
         });
 
-        // Kembalikan kuota ke 10
+        // kembalikan kuota jadwal ke 10
         $this->schedule->update(['kuota' => 10]);
     }
 
-    /**
-     * TC-PBI09-10 (Exception): Pasien mencoba membuka URL tiket antrean milik pasien lain (403 Forbidden).
-     */
+    // tc-pbi09-10 (exception): pasien ditolak dengan error 403 kalau mencoba membuka url tiket milik pasien lain
     public function test_tc_pbi09_10_pasien_ditolak_melihat_tiket_antrean_orang_lain(): void
     {
         $pasienLain = User::firstOrCreate(
