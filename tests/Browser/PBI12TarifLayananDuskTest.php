@@ -41,6 +41,15 @@ class PBI12TarifLayananDuskTest extends DuskTestCase
     }
 
     /**
+     * Helper: Login otomatis sebagai Admin ke URL target.
+     */
+    protected function pastikanLoginAdmin(Browser $browser, string $targetUrl): void
+    {
+        $browser->loginAs($this->admin)
+            ->visit($targetUrl);
+    }
+
+    /**
      * Skenario Normal PBI-12 (Kelola Layanan dan Tarif):
      * 1. Login sebagai Admin
      * 2. Buka menu Layanan & Tarif (/admin/layanan)
@@ -55,17 +64,10 @@ class PBI12TarifLayananDuskTest extends DuskTestCase
         Layanan::where('nama_layanan', $namaUji)->delete();
 
         $this->browse(function (Browser $browser) use ($namaUji) {
-            // 1. Login Admin
-            $browser->visit('/login')
-                ->waitForText('Masuk ke Akun Anda')
-                ->type('no_hp', '081234567890')
-                ->type('password', 'password')
-                ->press('button[type="submit"]')
-                ->waitForText('Login berhasil');
+            // 1. Pastikan login Admin & buka menu Layanan & Tarif (PBI-12)
+            $this->pastikanLoginAdmin($browser, '/admin/layanan');
 
-            // 2. Buka menu Layanan & Tarif (PBI-12)
-            $browser->visit('/admin/layanan')
-                ->waitForText('Layanan dan Tarif')
+            $browser->waitForText('Layanan dan Tarif')
                 ->assertSee('Tambah Layanan');
 
             // 3. Buka form tambah layanan jika terlipat
@@ -154,8 +156,9 @@ class PBI12TarifLayananDuskTest extends DuskTestCase
         );
 
         $this->browse(function (Browser $browser) use ($existing) {
-            $browser->visit('/admin/layanan')
-                ->waitForText('Layanan dan Tarif')
+            $this->pastikanLoginAdmin($browser, '/admin/layanan');
+
+            $browser->waitForText('Layanan dan Tarif')
                 ->script("
                     const formCollapse = document.getElementById('collapseFormLayanan');
                     if (formCollapse && !formCollapse.classList.contains('show')) {
@@ -181,8 +184,9 @@ class PBI12TarifLayananDuskTest extends DuskTestCase
     public function test_exception_tambah_layanan_ditolak_jika_tarif_negatif(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/admin/layanan')
-                ->waitForText('Layanan dan Tarif')
+            $this->pastikanLoginAdmin($browser, '/admin/layanan');
+
+            $browser->waitForText('Layanan dan Tarif')
                 ->script("
                     const formCollapse = document.getElementById('collapseFormLayanan');
                     if (formCollapse && !formCollapse.classList.contains('show')) {
