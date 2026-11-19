@@ -37,7 +37,7 @@ class DokterKonsultasiController extends Controller
 
         return redirect()
             ->route('konsultasi.ruang', $consultation)
-            ->with('success', 'Sesi dimulai.');
+            ->with('sukses', 'Sesi dimulai.');
     }
 
     /** ongoing -> completed */
@@ -53,7 +53,7 @@ class DokterKonsultasiController extends Controller
 
         return redirect()
             ->route('dokter.konsultasi.index')
-            ->with('success', 'Sesi diakhiri.');
+            ->with('sukses', 'Sesi diakhiri.');
     }
 
     private function profilDokter()

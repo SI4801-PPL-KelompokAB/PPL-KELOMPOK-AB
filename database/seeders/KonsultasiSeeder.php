@@ -14,12 +14,22 @@ use Illuminate\Database\Seeder;
 /**
  * Data uji Konsultasi Online (PBI10, PBI11).
  * Jalankan: php artisan db:seed --class=KonsultasiSeeder
+ *
+ * Akun uji (login pakai nomor telepon):
+ * - Pasien  Budi Santoso : 081299999999 / password
+ * - Dokter  dr. Andi     : 081200000001 / password
+ * - Dokter  dr. Sari     : 081200000002 / password
+ * - Dokter  drg. Budi    : 081200000003 / password
+ * - Dokter  dr. Rina     : 081200000004 / password
  */
 class KonsultasiSeeder extends Seeder
 {
+    /** Password semua akun uji di seeder ini. */
+    private const PASSWORD = 'password';
+
     public function run(): void
     {
-        // users.role dan users.is_active belum ada di $fillable model User
+        // users.role dan users.is_active belum tentu ada di $fillable model User
         Model::unguarded(function () {
             $cabang = KlinikCabang::firstOrCreate(
                 ['nama_cabang' => 'Klinik Bonamu Pusat'],
@@ -50,16 +60,8 @@ class KonsultasiSeeder extends Seeder
             $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
 
             foreach ($daftarDokter as $i => [$nama, $email, $noHp, $poliIndex]) {
-                $user = User::firstOrCreate(
-                    ['email' => $email],
-                    [
-                        'name' => $nama,
-                        'no_hp' => $noHp,
-                        'password' => bcrypt('password'),
-                        'role' => 'dokter',
-                        'is_active' => true,
-                    ]
-                );
+                // updateOrCreate: akun lama ikut diperbarui (no_hp, password, status) saat seeder dijalankan ulang
+                $user = $this->akunUji($email, $nama, $noHp, 'dokter');
 
                 $dokter = Doctor::firstOrCreate(
                     ['user_id' => $user->id],
@@ -78,21 +80,30 @@ class KonsultasiSeeder extends Seeder
                 }
             }
 
-            $pasien = User::firstOrCreate(
-                ['email' => 'pasien@test.com'],
-                [
-                    'name' => 'Budi Santoso',
-                    'no_hp' => '081299999999',
-                    'password' => bcrypt('password'),
-                    'role' => 'pasien',
-                    'is_active' => true,
-                ]
-            );
+            $pasien = $this->akunUji('pasien@test.com', 'Budi Santoso', '081299999999', 'pasien');
 
             PatientProfile::firstOrCreate(
                 ['user_id' => $pasien->id],
                 ['tanggal_lahir' => '2000-01-01', 'jenis_kelamin' => 'L', 'alamat' => 'Bandung']
             );
         });
+    }
+
+    /**
+     * Buat akun uji, atau perbarui kalau email sudah ada,
+     * supaya nomor HP dan password selalu sesuai daftar di atas.
+     */
+    private function akunUji(string $email, string $nama, string $noHp, string $role): User
+    {
+        return User::updateOrCreate(
+            ['email' => $email],
+            [
+                'name' => $nama,
+                'no_hp' => $noHp,
+                'password' => bcrypt(self::PASSWORD),
+                'role' => $role,
+                'is_active' => true,
+            ]
+        );
     }
 }
