@@ -40,6 +40,14 @@ class Poli extends Model
     }
 
     /**
+     * Daftar layanan medis dan tindakan di poli ini.
+     */
+    public function layanans(): HasMany
+    {
+        return $this->hasMany(Layanan::class);
+    }
+
+    /**
      * Daftar antrean yang merujuk ke poli ini melalui jadwal dokter.
      */
     public function queues(): HasManyThrough
