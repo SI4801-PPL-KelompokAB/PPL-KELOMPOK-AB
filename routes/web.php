@@ -18,9 +18,11 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-// Halaman utama (Portal Pengujian)
+// Halaman utama -> Arahkan ke Dashboard (jika sudah login) atau Halaman Login Bonamu
 Route::get('/', function () {
-    return view('welcome');
+    return Auth::check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
 });
 
 // ──────────────────────────────────────────
@@ -39,10 +41,10 @@ Route::get('/dashboard', function () {
     $role = Auth::user()?->role;
 
     return match ($role) {
-        'admin'  => redirect()->route('admin.dashboard'),
+        'admin' => redirect()->route('admin.dashboard'),
         'pasien' => redirect()->route('pasien.dashboard'),
         'dokter' => redirect()->route('dokter.konsultasi.index'),
-        default  => redirect('/login'),
+        default => redirect('/login'),
     };
 })->middleware('auth')->name('dashboard');
 
@@ -51,10 +53,10 @@ Route::get('/dashboard', function () {
 // ──────────────────────────────────────────
 Route::get('/dev/login-as/{role}', function (string $role) {
     $email = match ($role) {
-        'admin'  => 'admin@test.com',
+        'admin' => 'admin@test.com',
         'dokter' => 'dokter.andi@test.com',
         'pasien' => 'pasien@test.com',
-        default  => null,
+        default => null,
     };
 
     $user = User::where('email', $email)->orWhere('role', $role)->first();
@@ -63,10 +65,10 @@ Route::get('/dev/login-as/{role}', function (string $role) {
         Auth::login($user);
 
         return match ($role) {
-            'admin'  => redirect()->route('admin.dashboard')->with('sukses', "Login instan berhasil sebagai Admin ({$user->name})"),
+            'admin' => redirect()->route('admin.dashboard')->with('sukses', "Login instan berhasil sebagai Admin ({$user->name})"),
             'dokter' => redirect()->route('dokter.konsultasi.index')->with('success', "Login instan berhasil sebagai Dokter ({$user->name})"),
             'pasien' => redirect()->route('pasien.dashboard')->with('success', "Login instan berhasil sebagai Pasien ({$user->name})"),
-            default  => redirect('/'),
+            default => redirect('/'),
         };
     }
 
