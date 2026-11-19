@@ -19,6 +19,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
 
     protected User $pasien;
 
+    // siapkan akun admin, pasien, poli, dan dokter sebelum skenario test berjalan
     protected function setUp(): void
     {
         parent::setUp();
@@ -49,9 +50,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
         $this->doctor = Doctor::first();
     }
 
-    /**
-     * Helper: Login otomatis lewat form jika sesi browser belum login sebagai Admin.
-     */
+    // fungsi bantu: otomatis login sebagai admin di browser kalau belum login
     protected function pastikanLoginAdmin(Browser $browser, string $targetUrl): void
     {
         $browser->visit($targetUrl)->pause(600);
@@ -66,9 +65,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
         }
     }
 
-    /**
-     * TC-PBI07-01 (Normal): Admin melihat daftar jadwal praktik dokter yang tersedia.
-     */
+    // tc-pbi07-01 (normal): admin membuka dan melihat halaman daftar jadwal praktik dokter
     public function test_tc_pbi07_01_admin_melihat_daftar_jadwal_praktik(): void
     {
         $this->browse(function (Browser $browser) {
@@ -80,11 +77,10 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
         });
     }
 
-    /**
-     * TC-PBI07-02 (Normal): Admin membuat jadwal praktik baru dengan data yang valid (masuk ke phpMyAdmin).
-     */
+    // tc-pbi07-02 (normal): admin membuat jadwal praktik baru di hari sabtu (data masuk ke phpmyadmin)
     public function test_tc_pbi07_02_admin_membuat_jadwal_praktik_baru(): void
     {
+        // bersihkan jadwal sabtu lama supaya bisa input jadwal baru dari awal
         DoctorSchedule::where('doctor_id', $this->doctor->id)->where('hari', 'sabtu')->delete();
 
         $this->browse(function (Browser $browser) {
@@ -102,9 +98,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
         });
     }
 
-    /**
-     * TC-PBI07-03 (Normal): Admin mengedit jadwal praktik dokter yang sudah ada.
-     */
+    // tc-pbi07-03 (normal): admin mengedit kuota jadwal praktik dokter yang sudah ada jadi 25
     public function test_tc_pbi07_03_admin_mengedit_jadwal_praktik(): void
     {
         $jadwal = DoctorSchedule::firstOrCreate(
@@ -129,9 +123,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
         });
     }
 
-    /**
-     * TC-PBI07-04 (Normal): Admin menonaktifkan jadwal praktik dokter tanpa menghapus data.
-     */
+    // tc-pbi07-04 (normal): admin menonaktifkan status jadwal praktik tanpa menghapus datanya
     public function test_tc_pbi07_04_admin_menonaktifkan_jadwal_praktik(): void
     {
         $jadwal = DoctorSchedule::updateOrCreate(
@@ -155,13 +147,11 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
                 ->assertSee('Jadwal praktik berhasil dinonaktifkan.');
         });
 
-        // Aktifkan kembali agar data jadwal di phpMyAdmin tetap berstatus aktif
+        // aktifkan kembali supaya jadwal di phpmyadmin tetap aktif untuk test lain
         $jadwal->update(['status' => true]);
     }
 
-    /**
-     * TC-PBI07-05 (Exception): Input jadwal di mana jam selesai lebih awal atau sama dengan jam mulai.
-     */
+    // tc-pbi07-05 (exception): sistem menolak jadwal kalau jam selesai lebih awal dari jam mulai
     public function test_tc_pbi07_05_ditolak_jika_jam_selesai_lebih_awal_dari_jam_mulai(): void
     {
         $this->browse(function (Browser $browser) {
@@ -171,6 +161,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
                 ->select('poli_id', (string) $this->poli->id)
                 ->select('hari', 'minggu');
 
+            // isi jam mulai 12:00 dan jam selesai 08:00 (terbalik)
             $browser->script([
                 "document.querySelector('input[name=\"jam_mulai\"]').value = '12:00';",
                 "document.querySelector('input[name=\"jam_selesai\"]').value = '08:00';",
@@ -183,9 +174,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
         });
     }
 
-    /**
-     * TC-PBI07-06 (Exception): Input jadwal dengan nilai kuota antrean kurang dari 1 (0).
-     */
+    // tc-pbi07-06 (exception): sistem menolak jadwal kalau kuota diisi kurang dari 1 (0)
     public function test_tc_pbi07_06_ditolak_jika_kuota_kurang_dari_satu(): void
     {
         $this->browse(function (Browser $browser) {
@@ -195,6 +184,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
                 ->select('poli_id', (string) $this->poli->id)
                 ->select('hari', 'minggu');
 
+            // lepas batas html min=1 supaya form bisa disubmit dengan angka 0 ke backend
             $browser->script([
                 "document.querySelector('input[name=\"kuota\"]').removeAttribute('min');",
             ]);
@@ -207,11 +197,10 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
         });
     }
 
-    /**
-     * TC-PBI07-07 (Exception): Input jadwal baru yang bentrok / bertabrakan jamnya di hari yang sama.
-     */
+    // tc-pbi07-07 (exception): sistem menolak jadwal kalau jamnya bertabrakan dengan jadwal di hari yang sama
     public function test_tc_pbi07_07_ditolak_jika_jadwal_bentrok(): void
     {
+        // pastikan jadwal sabtu jam 08:00-12:00 sudah ada di database
         DoctorSchedule::updateOrCreate(
             ['doctor_id' => $this->doctor->id, 'hari' => 'sabtu', 'poli_id' => $this->poli->id],
             [
@@ -225,6 +214,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $this->pastikanLoginAdmin($browser, '/admin/jadwal/create');
 
+            // coba input jadwal di dokter, hari, dan jam yang sama
             $browser->select('doctor_id', (string) $this->doctor->id)
                 ->select('poli_id', (string) $this->poli->id)
                 ->select('hari', 'sabtu')
@@ -236,9 +226,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
         });
     }
 
-    /**
-     * TC-PBI07-08 (Exception): Pengguna ber-role non-admin (Pasien) mencoba mengakses URL /admin/jadwal.
-     */
+    // tc-pbi07-08 (exception): akun non-admin (pasien) ditolak dengan error 403 saat buka halaman jadwal admin
     public function test_tc_pbi07_08_non_admin_ditolak_mengakses_jadwal_admin(): void
     {
         $this->browse(function (Browser $browser) {
@@ -247,7 +235,7 @@ class PBI07JadwalPraktikBrowserTest extends DuskTestCase
                 ->pause(1000)
                 ->assertSee('403');
 
-            // Kembalikan sesi ke Admin
+            // kembalikan login ke admin setelah test selesai
             $browser->loginAs($this->admin);
         });
     }

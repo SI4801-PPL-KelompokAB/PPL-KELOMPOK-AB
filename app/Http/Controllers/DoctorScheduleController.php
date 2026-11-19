@@ -16,38 +16,38 @@ class DoctorScheduleController extends Controller
 {
     protected DoctorScheduleService $scheduleService;
 
+    // hubungkan controller dengan service logika jadwal dokter
     public function __construct(DoctorScheduleService $scheduleService)
     {
         $this->scheduleService = $scheduleService;
     }
 
-    /**
-     * Menampilkan daftar jadwal praktik dokter.
-     */
+    // tampilkan halaman daftar jadwal praktik dokter beserta filter pencarian
     public function index(Request $request)
     {
         $query = DoctorSchedule::with(['doctor.user', 'poli']);
 
-        // Filter poli
+        // saring berdasarkan poli jika dipilih
         if ($request->filled('poli_id')) {
             $query->where('poli_id', $request->poli_id);
         }
 
-        // Filter dokter
+        // saring berdasarkan dokter jika dipilih
         if ($request->filled('doctor_id')) {
             $query->where('doctor_id', $request->doctor_id);
         }
 
-        // Filter hari
+        // saring berdasarkan hari jika dipilih
         if ($request->filled('hari')) {
             $query->where('hari', strtolower($request->hari));
         }
 
-        // Filter status
+        // saring berdasarkan status aktif atau nonaktif jika dipilih
         if ($request->filled('status')) {
             $query->where('status', (bool) $request->status);
         }
 
+        // urutkan berdasarkan hari dan jam mulai, lalu bagi 15 data per halaman
         $schedules = $query->orderBy('hari')
             ->orderBy('jam_mulai')
             ->paginate(15)
@@ -60,9 +60,7 @@ class DoctorScheduleController extends Controller
         return view('admin.jadwal.index', compact('schedules', 'doctors', 'polis', 'daftarHari'));
     }
 
-    /**
-     * Menampilkan form tambah jadwal praktik dokter.
-     */
+    // tampilkan halaman form tambah jadwal praktik baru
     public function create()
     {
         $doctors = Doctor::with('user')->get();
@@ -72,9 +70,7 @@ class DoctorScheduleController extends Controller
         return view('admin.jadwal.create', compact('doctors', 'polis', 'daftarHari'));
     }
 
-    /**
-     * Menyimpan jadwal praktik dokter baru.
-     */
+    // simpan jadwal baru ke database lewat service (kalau jam bentrok, tangkap error-nya)
     public function store(StoreDoctorScheduleRequest $request)
     {
         try {
@@ -87,25 +83,21 @@ class DoctorScheduleController extends Controller
         }
     }
 
-    /**
-     * Menampilkan form edit jadwal praktik dokter.
-     */
+    // tampilkan halaman form edit jadwal praktik yang dipilih
     public function edit(DoctorSchedule $doctorSchedule)
     {
         $doctors = Doctor::with('user')->get();
         $polis = Poli::where('status', true)->get();
         $daftarHari = DoctorScheduleService::HARI;
 
-        // Format waktu untuk input form (H:i)
+        // ubah format jam dari 08:00:00 jadi 08:00 supaya terbaca di input form html
         $doctorSchedule->jam_mulai_formatted = Carbon::parse($doctorSchedule->jam_mulai)->format('H:i');
         $doctorSchedule->jam_selesai_formatted = Carbon::parse($doctorSchedule->jam_selesai)->format('H:i');
 
         return view('admin.jadwal.edit', compact('doctorSchedule', 'doctors', 'polis', 'daftarHari'));
     }
 
-    /**
-     * Memperbarui jadwal praktik dokter.
-     */
+    // simpan perubahan edit jadwal ke database lewat service
     public function update(UpdateDoctorScheduleRequest $request, DoctorSchedule $doctorSchedule)
     {
         try {
@@ -118,9 +110,7 @@ class DoctorScheduleController extends Controller
         }
     }
 
-    /**
-     * Menonaktifkan atau mengaktifkan jadwal praktik (tidak menghapus permanen).
-     */
+    // ubah status jadwal jadi aktif atau nonaktif tanpa menghapus datanya dari database
     public function destroy(DoctorSchedule $doctorSchedule)
     {
         try {
@@ -137,9 +127,7 @@ class DoctorScheduleController extends Controller
         }
     }
 
-    /**
-     * Toggle status aktif / nonaktif jadwal.
-     */
+    // panggil fungsi ubah status aktif atau nonaktif jadwal
     public function toggleStatus(DoctorSchedule $doctorSchedule)
     {
         return $this->destroy($doctorSchedule);

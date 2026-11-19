@@ -17,25 +17,21 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-// Halaman utama -> Arahkan ke Dashboard (jika sudah login) atau Halaman Login Bonamu
+// halaman utama: kalau sudah login masuk ke dashboard, kalau belum masuk ke halaman login
 Route::get('/', function () {
     return Auth::check()
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 });
 
-// ──────────────────────────────────────────
-// PBI-01 & PBI-02: Registrasi Pasien & Login User
-// ──────────────────────────────────────────
+// route registrasi pasien baru, login, dan logout
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.authenticate');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// ──────────────────────────────────────────
-// Multi-role Dashboard Router
-// ──────────────────────────────────────────
+// pengarah dashboard otomatis sesuai role user yang sedang login
 Route::get('/dashboard', function () {
     $role = Auth::user()?->role;
 
@@ -47,9 +43,7 @@ Route::get('/dashboard', function () {
     };
 })->middleware('auth')->name('dashboard');
 
-// ──────────────────────────────────────────
-// Route Cepat untuk Pengujian / White Box Testing
-// ──────────────────────────────────────────
+// tombol ganti role cepat khusus untuk mempermudah pengujian
 Route::get('/dev/login-as/{role}', function (string $role) {
     $email = match ($role) {
         'admin' => 'admin@test.com',
@@ -74,26 +68,24 @@ Route::get('/dev/login-as/{role}', function (string $role) {
     return redirect('/login')->withErrors(['error' => 'Akun uji tidak ditemukan. Silakan jalankan seeder terlebih dahulu.']);
 })->name('dev.login-as');
 
-// ──────────────────────────────────────────
-// Admin Routes (Dashboard, Poli, Jadwal, Profil, Akun)
-// ──────────────────────────────────────────
+// grup route khusus admin (hanya bisa diakses oleh role admin)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard Admin
+    // halaman dashboard admin
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // Profil Admin
+    // halaman edit profil admin
     Route::get('/profil', [AdminProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [AdminProfileController::class, 'update'])->name('profil.update');
 
-    // PBI-05: Mengelola Data Poli
+    // pbi 05: kelola data poli klinik
     Route::resource('poli', PoliController::class)->except(['show', 'destroy']);
     Route::patch('poli/{poli}/toggle-status', [PoliController::class, 'toggleStatus'])->name('poli.toggle-status');
 
-    // PBI-12 (Pengganti): Mengelola Data Cabang Klinik
+    // pbi 12: kelola data cabang klinik
     Route::resource('cabang', CabangController::class)->except(['show', 'destroy']);
     Route::patch('cabang/{cabang}/toggle-status', [CabangController::class, 'toggleStatus'])->name('cabang.toggle-status');
 
-    // PBI-07: Kelola Jadwal Praktik Dokter
+    // pbi 07 (milik nara): kelola jadwal praktik dokter (lihat, tambah, edit, dan ubah status aktif/nonaktif)
     Route::resource('jadwal', DoctorScheduleController::class)
         ->parameters(['jadwal' => 'doctorSchedule'])
         ->except(['show']);
@@ -101,27 +93,25 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->name('jadwal.toggle-status');
 });
 
-// PBI-03: Admin membuat akun dokter dan admin (otorisasi internal di controller)
+// pbi 03: admin membuat akun dokter dan staf admin
 Route::prefix('admin/akun')->name('admin.akun.')->group(function () {
     Route::get('/', [UserManagementController::class, 'index'])->name('index');
     Route::get('/create', [UserManagementController::class, 'create'])->name('create');
     Route::post('/', [UserManagementController::class, 'store'])->name('store');
 });
 
-// ──────────────────────────────────────────
-// Pasien Routes (Dashboard, Profil, Antrean, Konsultasi)
-// ──────────────────────────────────────────
+// grup route khusus pasien (hanya bisa diakses oleh role pasien)
 Route::middleware(['auth', 'role:pasien'])->group(function () {
-    // Dashboard Pasien
+    // halaman dashboard pasien
     Route::get('/pasien/dashboard', [PatientDashboardController::class, 'index'])->name('pasien.dashboard');
 
-    // PBI-04: Profil Identitas Pasien
+    // pbi 04: kelola profil identitas pasien
     Route::prefix('pasien/profil')->name('pasien.profil.')->group(function () {
         Route::get('/', [PatientProfileController::class, 'edit'])->name('edit');
         Route::put('/', [PatientProfileController::class, 'update'])->name('update');
     });
 
-    // PBI-09: Antrean Online
+    // pbi 09 (milik nara): pendaftaran antrean online dan lihat tiket antrean
     Route::prefix('antrean')->name('antrean.')->group(function () {
         Route::get('/', [QueueController::class, 'index'])->name('index');
         Route::get('/ambil', [QueueController::class, 'create'])->name('create');
@@ -129,7 +119,7 @@ Route::middleware(['auth', 'role:pasien'])->group(function () {
         Route::get('/{queue}', [QueueController::class, 'show'])->name('show');
     });
 
-    // PBI-10: Konsultasi Online (Pasien)
+    // pbi 10: konsultasi online dari sisi pasien
     Route::prefix('konsultasi')->name('konsultasi.')->group(function () {
         Route::get('/buat', [KonsultasiOnlineController::class, 'create'])->name('create');
         Route::post('/', [KonsultasiOnlineController::class, 'store'])->name('store');
@@ -139,9 +129,7 @@ Route::middleware(['auth', 'role:pasien'])->group(function () {
     });
 });
 
-// ──────────────────────────────────────────
-// Dokter Routes (PBI-11 Konsultasi Dokter)
-// ──────────────────────────────────────────
+// pbi 11: penanganan konsultasi online dari sisi dokter
 Route::middleware(['auth', 'role:dokter'])->prefix('dokter/konsultasi')->name('dokter.konsultasi.')->group(function () {
     Route::get('/', [DokterKonsultasiController::class, 'index'])->name('index');
     Route::post('/{consultation}/mulai', [DokterKonsultasiController::class, 'mulai'])->name('mulai');
