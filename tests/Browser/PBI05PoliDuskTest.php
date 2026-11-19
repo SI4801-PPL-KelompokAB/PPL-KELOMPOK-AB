@@ -12,6 +12,7 @@ use Tests\DuskTestCase;
 class PBI05PoliDuskTest extends DuskTestCase
 {
     private User $admin;
+    private User $pasien;
     private KlinikCabang $cabang;
 
     protected function setUp(): void
@@ -28,7 +29,7 @@ class PBI05PoliDuskTest extends DuskTestCase
             ]
         );
 
-        // Pastikan akun admin tersedia
+        // Akun Admin
         $this->admin = User::firstOrCreate(
             ['email' => 'admin@test.com'],
             [
@@ -40,11 +41,22 @@ class PBI05PoliDuskTest extends DuskTestCase
                 'klinik_cabang_id' => $this->cabang->id,
             ]
         );
-
-        // Pastikan nomor hp dan password cocok untuk login
         $this->admin->no_hp = '081234567890';
         $this->admin->password = bcrypt('password');
         $this->admin->save();
+
+        // Akun Pasien
+        $this->pasien = User::firstOrCreate(
+            ['email' => 'pasien.dusk@bonamu.test'],
+            [
+                'name' => 'Pasien Dusk',
+                'no_hp' => '089999999999',
+                'password' => bcrypt('password'),
+                'role' => 'pasien',
+                'is_active' => true,
+                'klinik_cabang_id' => $this->cabang->id,
+            ]
+        );
     }
 
     /**
@@ -57,111 +69,265 @@ class PBI05PoliDuskTest extends DuskTestCase
     }
 
     /**
-     * Skenario Otomatisasi Lengkap PBI-05 (Mengelola Data Poli):
-     * 1. Otomatisasi Login Admin
-     * 2. Navigasi ke menu Data Poli
-     * 3. Input & Simpan Poli baru (Poli Mata / PMT)
-     * 4. Ubah nama Poli menjadi 'Poli Mata & Spesialis Retina'
-     * 5. Nonaktifkan status Poli via konfirmasi browser dialog
-     * 6. Pembuktian seluruh aksi tersimpan nyata di database MySQL (tidak di-rollback)
+     * TC-01: Admin menambah data poli baru dengan data lengkap dan valid
      */
-    public function test_alur_lengkap_pbi05_kelola_data_poli_melalui_browser_dan_database(): void
+    public function test_tc01_admin_menambah_poli_baru_dengan_data_valid(): void
     {
-        // Bersihkan data uji PMT jika sisa pengujian sebelumnya
-        Poli::withoutGlobalScopes()->where('kode_poli', 'PMT')->delete();
+        Poli::withoutGlobalScopes()->where('kode_poli', 'PED')->delete();
 
         $this->browse(function (Browser $browser) {
-            // 1. Pastikan login sebagai Admin & akses halaman Data Poli
             $this->pastikanLoginAdmin($browser, '/admin/poli');
 
             $browser->waitForText('Data Poli')
-                ->assertPresent('@tabel-poli');
+                ->assertPresent('@tabel-poli')
+                ->value('#kode_poli', 'PED')
+                ->value('#nama_poli', 'Poli Anak (Pediatri)')
+                ->value('#deskripsi', 'Layanan kesehatan dan imunisasi anak');
 
-            // 3. Mengisi form Tambah Poli baru menggunakan native value() Dusk
-            $browser->value('#kode_poli', 'PMT')
-                ->value('#nama_poli', 'Poli Mata')
-                ->value('#deskripsi', 'Layanan pemeriksaan kesehatan mata, refraksi, dan penanganan katarak');
-
-            // Submit form tambah
             $browser->driver->findElement(WebDriverBy::cssSelector('form[dusk="form-tambah-poli"]'))->submit();
 
-            // 4. Verifikasi notifikasi sukses dan data muncul di tabel
             $browser->waitForText('Poli berhasil ditambahkan.')
-                ->assertSee('Poli Mata')
-                ->assertSee('PMT');
+                ->assertSee('Poli Anak (Pediatri)')
+                ->assertSee('PED');
 
-            // Pembuktian Database Tahap 1: Data tersimpan di tabel MySQL
-            $poli = Poli::withoutGlobalScopes()->where('kode_poli', 'PMT')->first();
-            $this->assertNotNull($poli, 'Poli PMT harus sudah tersimpan di database MySQL.');
-            $this->assertEquals('Poli Mata', $poli->nama_poli);
-            $this->assertEquals(1, $poli->status);
-
-            // 5. Ubah data Poli (Klik tombol Ubah pada baris poli PMT)
-            $browser->script("document.querySelector('[dusk=\"tombol-edit-{$poli->id}\"]').click();");
-            $browser->waitForText('Ubah Poli');
-
-            // Ubah nama poli
-            $browser->value('#nama_poli', 'Poli Mata & Spesialis Retina');
-            $browser->driver->findElement(WebDriverBy::cssSelector('form[dusk="form-edit-poli"]'))->submit();
-
-            // 6. Verifikasi perubahan sukses di browser
-            $browser->waitForText('Poli berhasil diperbarui.')
-                ->assertSee('Poli Mata & Spesialis Retina');
-
-            // Pembuktian Database Tahap 2: Nama terupdate di database MySQL
-            $poli->refresh();
-            $this->assertEquals('Poli Mata & Spesialis Retina', $poli->nama_poli);
-
-            // 7. Nonaktifkan status Poli (Toggle status)
-            $browser->driver->findElement(WebDriverBy::cssSelector("form[dusk='form-toggle-{$poli->id}']"))->submit();
-
-            // 8. Verifikasi status berubah menjadi Nonaktif di browser
-            $browser->waitForText('Poli berhasil dinonaktifkan.')
-                ->waitFor("@badge-nonaktif-{$poli->id}")
-                ->assertPresent("@badge-nonaktif-{$poli->id}");
-
-            // Pembuktian Database Tahap 3: Status di database MySQL berubah menjadi 0 (Nonaktif)
-            $poli->refresh();
-            $this->assertEquals(0, $poli->status);
+            $this->assertDatabaseHas('polis', [
+                'kode_poli' => 'PED',
+                'nama_poli' => 'Poli Anak (Pediatri)',
+                'status' => 1,
+            ]);
         });
-
-        // Verifikasi Akhir: Data PMT tetap tersimpan nyata di database MySQL untuk diperiksa oleh dosen
-        $this->assertDatabaseHas('polis', [
-            'kode_poli' => 'PMT',
-            'nama_poli' => 'Poli Mata & Spesialis Retina',
-            'status' => 0,
-        ]);
     }
 
     /**
-     * Skenario Exception PBI-05:
-     * Tambah poli baru ditolak jika kode poli sudah digunakan di cabang yang sama.
+     * TC-02: Admin mengubah nama dan deskripsi poli yang sudah ada
      */
-    public function test_exception_tambah_poli_ditolak_jika_kode_poli_sudah_digunakan(): void
+    public function test_tc02_admin_mengubah_nama_dan_deskripsi_poli(): void
     {
-        // Pastikan kode poli PU sudah ada di database
-        Poli::withoutGlobalScopes()->firstOrCreate(
-            ['kode_poli' => 'PU'],
+        $poli = Poli::withoutGlobalScopes()->firstOrCreate(
+            ['kode_poli' => 'PGT'],
             [
                 'klinik_cabang_id' => $this->cabang->id,
-                'nama_poli' => 'Poli Umum Eksisting',
-                'deskripsi' => 'Layanan medis umum',
+                'nama_poli' => 'Poli Gigi dan Mulut',
+                'deskripsi' => 'Layanan gigi umum',
                 'status' => true,
             ]
         );
 
+        $this->browse(function (Browser $browser) use ($poli) {
+            $this->pastikanLoginAdmin($browser, route('admin.poli.edit', $poli));
+
+            $browser->waitForText('Ubah Poli')
+                ->value('#nama_poli', 'Poli Gigi & Mulut Spesialis')
+                ->value('#deskripsi', 'Layanan pemeriksaan gigi lengkap dan bedah mulut');
+
+            $browser->driver->findElement(WebDriverBy::cssSelector('form[dusk="form-edit-poli"]'))->submit();
+
+            $browser->waitForText('Poli berhasil diperbarui.')
+                ->assertSee('Poli Gigi & Mulut Spesialis');
+
+            $poli->refresh();
+            $this->assertEquals('Poli Gigi & Mulut Spesialis', $poli->nama_poli);
+        });
+    }
+
+    /**
+     * TC-03: Admin menonaktifkan status operasional poli (toggle status aktif ke nonaktif)
+     */
+    public function test_tc03_admin_menonaktifkan_status_operasional_poli(): void
+    {
+        $poli = Poli::withoutGlobalScopes()->firstOrCreate(
+            ['kode_poli' => 'IMN'],
+            [
+                'klinik_cabang_id' => $this->cabang->id,
+                'nama_poli' => 'Poli Imunisasi',
+                'deskripsi' => 'Layanan vaksinasi dan imunisasi',
+                'status' => true,
+            ]
+        );
+        $poli->update(['status' => true]);
+
+        $this->browse(function (Browser $browser) use ($poli) {
+            $this->pastikanLoginAdmin($browser, '/admin/poli');
+            $browser->waitForText('Data Poli');
+
+            $browser->driver->findElement(WebDriverBy::cssSelector("form[dusk='form-toggle-{$poli->id}']"))->submit();
+
+            $browser->waitForText('Poli berhasil dinonaktifkan.')
+                ->waitFor("@badge-nonaktif-{$poli->id}")
+                ->assertPresent("@badge-nonaktif-{$poli->id}");
+
+            $poli->refresh();
+            $this->assertEquals(0, $poli->status);
+        });
+    }
+
+    /**
+     * TC-04: Admin mengaktifkan kembali status poli yang sebelumnya nonaktif
+     */
+    public function test_tc04_admin_mengaktifkan_kembali_status_poli(): void
+    {
+        $poli = Poli::withoutGlobalScopes()->firstOrCreate(
+            ['kode_poli' => 'KIA'],
+            [
+                'klinik_cabang_id' => $this->cabang->id,
+                'nama_poli' => 'Poli KIA',
+                'deskripsi' => 'Kesehatan ibu dan anak',
+                'status' => false,
+            ]
+        );
+        $poli->update(['status' => false]);
+
+        $this->browse(function (Browser $browser) use ($poli) {
+            $this->pastikanLoginAdmin($browser, '/admin/poli');
+            $browser->waitForText('Data Poli');
+
+            $browser->driver->findElement(WebDriverBy::cssSelector("form[dusk='form-toggle-{$poli->id}']"))->submit();
+
+            $browser->waitForText('Poli berhasil diaktifkan.')
+                ->waitFor("@badge-aktif-{$poli->id}")
+                ->assertPresent("@badge-aktif-{$poli->id}");
+
+            $poli->refresh();
+            $this->assertEquals(1, $poli->status);
+        });
+    }
+
+    /**
+     * TC-05: Admin membuka dan melihat daftar seluruh data poli klinik
+     */
+    public function test_tc05_admin_melihat_daftar_seluruh_data_poli(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->pastikanLoginAdmin($browser, '/admin/poli');
+
+            $browser->waitForText('Daftar Poli')
+                ->assertPresent('@tabel-poli')
+                ->assertSee('KODE')
+                ->assertSee('NAMA')
+                ->assertSee('STATUS');
+        });
+    }
+
+    /**
+     * TC-06: Admin menyimpan poli dengan kolom wajib (kode atau nama) dikosongkan
+     */
+    public function test_tc06_admin_simpan_kolom_wajib_kosong_ditolak(): void
+    {
         $this->browse(function (Browser $browser) {
             $this->pastikanLoginAdmin($browser, '/admin/poli');
 
             $browser->waitForText('Data Poli')
-                ->value('#kode_poli', 'PU') // Kode PU sudah ada di seeder (Poli Umum)
-                ->value('#nama_poli', 'Poli Duplikat')
-                ->value('#deskripsi', 'Poli dengan kode yang bentrok');
+                ->script("
+                    document.getElementById('kode_poli').removeAttribute('required');
+                    document.getElementById('nama_poli').removeAttribute('required');
+                ");
+
+            $browser->value('#kode_poli', '')
+                ->value('#nama_poli', '');
+
+            $browser->driver->findElement(WebDriverBy::cssSelector('form[dusk="form-tambah-poli"]'))->submit();
+
+            $browser->waitForText('Kode poli wajib diisi.')
+                ->assertSee('Kode poli wajib diisi.')
+                ->assertSee('Nama poli wajib diisi.');
+        });
+    }
+
+    /**
+     * TC-07: Admin menambah poli dengan nama yang sudah terdaftar pada cabang klinik yang sama (duplikat)
+     */
+    public function test_tc07_admin_tambah_poli_nama_duplikat_ditolak(): void
+    {
+        $existing = Poli::withoutGlobalScopes()->firstOrCreate(
+            ['kode_poli' => 'PU'],
+            [
+                'klinik_cabang_id' => $this->cabang->id,
+                'nama_poli' => 'Poli Umum',
+                'deskripsi' => 'Layanan umum',
+                'status' => true,
+            ]
+        );
+
+        $this->browse(function (Browser $browser) use ($existing) {
+            $this->pastikanLoginAdmin($browser, '/admin/poli');
+
+            $browser->waitForText('Data Poli')
+                ->value('#kode_poli', 'PU-NEW')
+                ->value('#nama_poli', $existing->nama_poli);
+
+            $browser->driver->findElement(WebDriverBy::cssSelector('form[dusk="form-tambah-poli"]'))->submit();
+
+            $browser->waitForText('Nama poli sudah digunakan di cabang ini.')
+                ->assertSee('Nama poli sudah digunakan di cabang ini.');
+        });
+    }
+
+    /**
+     * TC-08: Admin menambah poli dengan kode yang sudah terdaftar pada cabang klinik yang sama (duplikat)
+     */
+    public function test_tc08_admin_tambah_poli_kode_duplikat_ditolak(): void
+    {
+        $existing = Poli::withoutGlobalScopes()->firstOrCreate(
+            ['kode_poli' => 'PU'],
+            [
+                'klinik_cabang_id' => $this->cabang->id,
+                'nama_poli' => 'Poli Umum',
+                'deskripsi' => 'Layanan umum',
+                'status' => true,
+            ]
+        );
+
+        $this->browse(function (Browser $browser) use ($existing) {
+            $this->pastikanLoginAdmin($browser, '/admin/poli');
+
+            $browser->waitForText('Data Poli')
+                ->value('#kode_poli', $existing->kode_poli)
+                ->value('#nama_poli', 'Poli Unik Baru');
 
             $browser->driver->findElement(WebDriverBy::cssSelector('form[dusk="form-tambah-poli"]'))->submit();
 
             $browser->waitForText('Kode poli sudah digunakan di cabang ini.')
                 ->assertSee('Kode poli sudah digunakan di cabang ini.');
+        });
+    }
+
+    /**
+     * TC-09: Admin menginput panjang karakter kode poli melebihi batas maksimal (20 karakter)
+     */
+    public function test_tc09_admin_input_karakter_melebihi_batas_ditolak(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->pastikanLoginAdmin($browser, '/admin/poli');
+
+            $browser->waitForText('Data Poli')
+                ->script("document.getElementById('kode_poli').removeAttribute('maxlength');");
+
+            $browser->value('#kode_poli', str_repeat('A', 25))
+                ->value('#nama_poli', 'Poli Kode Terlalu Panjang');
+
+            $browser->driver->findElement(WebDriverBy::cssSelector('form[dusk="form-tambah-poli"]'))->submit();
+
+            $browser->waitForText('Kode poli maksimal 20 karakter.')
+                ->assertSee('Kode poli maksimal 20 karakter.');
+        });
+    }
+
+    /**
+     * TC-10: Pengguna dengan role selain admin (pasien) dilarang mengakses URL data poli admin
+     */
+    public function test_tc10_pengguna_non_admin_dilarang_akses_data_poli(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->pasien)
+                ->visit('/admin/poli');
+
+            // Non-admin ditolak (403 forbidden atau diarahkan ke dashboard pasien)
+            $isBlocked = str_contains($browser->driver->getCurrentURL(), '/pasien') ||
+                         str_contains($browser->driver->getPageSource(), '403') ||
+                         str_contains($browser->driver->getPageSource(), 'Unauthorized') ||
+                         !str_contains($browser->driver->getCurrentURL(), '/admin/poli');
+
+            $this->assertTrue($isBlocked, 'Pengguna non-admin harus dilarang mengakses halaman kelola poli.');
         });
     }
 }
