@@ -91,6 +91,16 @@
             font-size: 1.1rem;
         }
 
+        .top-bar-puskesmas {
+            background-color: #0e382f;
+            color: #ffffff;
+            font-size: 0.725rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 0.4rem 0;
+            text-transform: uppercase;
+        }
+
         .nav-pill-item {
             color: #4a5568;
             font-size: 0.875rem;
@@ -102,13 +112,13 @@
         }
 
         .nav-pill-item:hover {
-            color: var(--app-primary);
+            color: #005954;
             background-color: #f1f5f9;
         }
 
         .nav-pill-item.active {
-            background-color: var(--app-primary-light);
-            color: var(--app-primary);
+            background-color: #bbf0e1;
+            color: #0b4f3f;
             font-weight: 600;
         }
 
@@ -311,50 +321,50 @@
             {{-- Navigasi Menu Dinamis Sesuai Role --}}
             <nav class="d-none d-md-flex align-items-center gap-1">
                 @auth
-                @if(auth()->user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="nav-pill-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-fill me-1"></i> Dashboard
-                </a>
-                <a href="{{ route('admin.poli.index') }}" class="nav-pill-item {{ request()->routeIs('admin.poli.*') ? 'active' : '' }}">
-                    <i class="bi bi-diagram-3 me-1"></i> Data Poli
-                </a>
-                <a href="{{ route('admin.cabang.index') }}" class="nav-pill-item {{ request()->routeIs('admin.cabang.*') ? 'active' : '' }}">
-                    <i class="bi bi-buildings me-1"></i> Cabang
-                </a>
-                <a href="{{ route('admin.jadwal.index') }}" class="nav-pill-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
-                    <i class="bi bi-calendar-week me-1"></i> Jadwal Dokter
-                </a>
-                <a href="{{ route('admin.akun.index') }}" class="nav-pill-item {{ request()->routeIs('admin.akun.*') ? 'active' : '' }}">
-                    <i class="bi bi-people me-1"></i> Akun Staf
-                </a>
-                <a href="{{ route('admin.antrean.index') }}" class="nav-pill-item {{ request()->routeIs('admin.antrean.*') ? 'active' : '' }}">
-        <i class="bi bi-ticket-detailed me-1"></i> Antrean
-    </a>
-                @elseif(auth()->user()->role === 'pasien')
-                <a href="{{ route('pasien.dashboard') }}" class="nav-pill-item {{ request()->routeIs('pasien.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-fill me-1"></i> Dashboard
-                </a>
-                <a href="{{ route('antrean.create') }}" class="nav-pill-item {{ request()->routeIs('antrean.create') ? 'active' : '' }}">
-                    <i class="bi bi-ticket-perforated me-1"></i> Ambil Antrean
-                </a>
-                <a href="{{ route('antrean.index') }}" class="nav-pill-item {{ request()->routeIs('antrean.index') || request()->routeIs('antrean.show') ? 'active' : '' }}">
-                    <i class="bi bi-card-checklist me-1"></i> Antrean Saya
-                </a>
-                <a href="{{ route('pasien.profil.edit') }}" class="nav-pill-item {{ request()->routeIs('pasien.profil.*') ? 'active' : '' }}">
-                    <i class="bi bi-person-lines-fill me-1"></i> Profil Pasien
-                </a>
-                <a href="{{ route('konsultasi.create') }}" class="nav-pill-item {{ request()->routeIs('konsultasi.*') ? 'active' : '' }}">
-                    <i class="bi bi-chat-dots me-1"></i> Konsultasi
-                </a>
-                @elseif(auth()->user()->role === 'dokter')
-                <a href="{{ route('dokter.konsultasi.index') }}" class="nav-pill-item {{ request()->routeIs('dokter.konsultasi.*') ? 'active' : '' }}">
-                    <i class="bi bi-clipboard2-pulse me-1"></i> Konsultasi Masuk
-                </a>
-                @endif
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('admin.dashboard') }}" class="nav-pill-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                            <i class="bi bi-grid-fill me-1"></i> Dashboard
+                        </a>
+                        <a href="{{ route('admin.poli.index') }}" class="nav-pill-item {{ request()->routeIs('admin.poli.*') ? 'active' : '' }}">
+                            <i class="bi bi-diagram-3 me-1"></i> Data Poli
+                        </a>
+                        <a href="{{ route('admin.cabang.index') }}" class="nav-pill-item {{ request()->routeIs('admin.cabang.*') ? 'active' : '' }}">
+                            <i class="bi bi-buildings me-1"></i> Cabang
+                        </a>
+                        <a href="{{ route('admin.jadwal.index') }}" class="nav-pill-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                            <i class="bi bi-calendar-week me-1"></i> Jadwal Dokter
+                        </a>
+                        <a href="{{ route('admin.akun.index') }}" class="nav-pill-item {{ request()->routeIs('admin.akun.*') ? 'active' : '' }}">
+                            <i class="bi bi-people me-1"></i> Akun Staf
+                        </a>
+                        <a href="{{ route('admin.antrean.index') }}" class="nav-pill-item {{ request()->routeIs('admin.antrean.*') ? 'active' : '' }}">
+                            <i class="bi bi-ticket-detailed me-1"></i> Antrean
+                        </a>
+                    @elseif(auth()->user()->role === 'pasien')
+                        <a href="{{ route('pasien.dashboard') }}" class="nav-pill-item {{ request()->routeIs('pasien.dashboard') ? 'active' : '' }}">
+                            <i class="bi bi-grid-fill me-1"></i> Dashboard
+                        </a>
+                        <a href="{{ route('antrean.create') }}" class="nav-pill-item {{ request()->routeIs('antrean.create') ? 'active' : '' }}">
+                            <i class="bi bi-ticket-perforated me-1"></i> Ambil Antrean
+                        </a>
+                        <a href="{{ route('antrean.index') }}" class="nav-pill-item {{ request()->routeIs('antrean.index') || request()->routeIs('antrean.show') ? 'active' : '' }}">
+                            <i class="bi bi-card-checklist me-1"></i> Antrean Saya
+                        </a>
+                        <a href="{{ route('pasien.profil.edit') }}" class="nav-pill-item {{ request()->routeIs('pasien.profil.*') ? 'active' : '' }}">
+                            <i class="bi bi-person-lines-fill me-1"></i> Profil Pasien
+                        </a>
+                        <a href="{{ route('konsultasi.create') }}" class="nav-pill-item {{ request()->routeIs('konsultasi.*') ? 'active' : '' }}">
+                            <i class="bi bi-chat-dots me-1"></i> Konsultasi
+                        </a>
+                    @elseif(auth()->user()->role === 'dokter')
+                        <a href="{{ route('dokter.konsultasi.index') }}" class="nav-pill-item {{ request()->routeIs('dokter.konsultasi.*') ? 'active' : '' }}">
+                            <i class="bi bi-clipboard2-pulse me-1"></i> Konsultasi Masuk
+                        </a>
+                    @endif
                 @else
-                <a href="{{ url('/') }}" class="nav-pill-item {{ request()->is('/') ? 'active' : '' }}">Portal Testing</a>
-                <a href="{{ route('login') }}" class="nav-pill-item {{ request()->routeIs('login') ? 'active' : '' }}">Login</a>
-                <a href="{{ route('register') }}" class="nav-pill-item {{ request()->routeIs('register') ? 'active' : '' }}">Register Pasien</a>
+                    <a href="{{ url('/') }}" class="nav-pill-item {{ request()->is('/') ? 'active' : '' }}">Portal Testing</a>
+                    <a href="{{ route('login') }}" class="nav-pill-item {{ request()->routeIs('login') ? 'active' : '' }}">Login</a>
+                    <a href="{{ route('register') }}" class="nav-pill-item {{ request()->routeIs('register') ? 'active' : '' }}">Register Pasien</a>
                 @endauth
             </nav>
 
@@ -400,29 +410,29 @@
                 </button>
 
                 @auth
-                @if(auth()->user()->role === 'admin')
-                <a href="{{ route('admin.profil.edit') }}" class="user-badge d-none d-sm-inline-flex text-decoration-none text-dark" title="Buka Profil Admin">
-                    <span>{{ auth()->user()->name }}</span>
-                    <span class="admin-pill">ADMIN</span>
-                </a>
-                @elseif(auth()->user()->role === 'pasien')
-                <a href="{{ route('pasien.profil.edit') }}" class="user-badge d-none d-sm-inline-flex text-decoration-none text-dark" title="Buka Profil Pasien">
-                    <span>{{ auth()->user()->name }}</span>
-                    <span class="badge bg-primary-subtle text-primary border px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">PASIEN</span>
-                </a>
-                @else
-                <div class="user-badge d-none d-sm-inline-flex">
-                    <span>{{ auth()->user()->name }}</span>
-                    <span class="admin-pill">{{ strtoupper(auth()->user()->role ?? 'USER') }}</span>
-                </div>
-                @endif
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('admin.profil.edit') }}" class="user-badge d-none d-sm-inline-flex text-decoration-none text-dark" title="Buka Profil Admin">
+                            <span>{{ auth()->user()->name }}</span>
+                            <span class="admin-pill">ADMIN</span>
+                        </a>
+                    @elseif(auth()->user()->role === 'pasien')
+                        <a href="{{ route('pasien.profil.edit') }}" class="user-badge d-none d-sm-inline-flex text-decoration-none text-dark" title="Buka Profil Pasien">
+                            <span>{{ auth()->user()->name }}</span>
+                            <span class="badge bg-primary-subtle text-primary border px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">PASIEN</span>
+                        </a>
+                    @else
+                        <div class="user-badge d-none d-sm-inline-flex">
+                            <span>{{ auth()->user()->name }}</span>
+                            <span class="admin-pill">{{ strtoupper(auth()->user()->role ?? 'USER') }}</span>
+                        </div>
+                    @endif
 
-                <form method="POST" action="{{ route('logout') }}" class="d-inline m-0">
-                    @csrf
-                    <button type="submit" class="btn-keluar">Keluar</button>
-                </form>
+                    <form method="POST" action="{{ route('logout') }}" class="d-inline m-0">
+                        @csrf
+                        <button type="submit" class="btn-keluar">Keluar</button>
+                    </form>
                 @else
-                <a href="{{ route('login') }}" class="btn btn-sm btn-primary rounded-pill px-3">Masuk</a>
+                    <a href="{{ route('login') }}" class="btn btn-sm btn-primary rounded-pill px-3">Masuk</a>
                 @endauth
             </div>
         </div>
