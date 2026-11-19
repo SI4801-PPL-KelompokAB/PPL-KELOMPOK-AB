@@ -1,4 +1,6 @@
 /.phpunit.cache
+*.sqlite
+*.sqlite-journal
 /node_modules
 /public/build
 /public/hot

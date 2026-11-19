@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('no_hp', 20)->nullable();
+            $table->string('no_hp', 20)->unique();
             $table->string('role', 20)->default('pasien');
             $table->boolean('is_active')->default(true);
             $table->timestamp('email_verified_at')->nullable();
