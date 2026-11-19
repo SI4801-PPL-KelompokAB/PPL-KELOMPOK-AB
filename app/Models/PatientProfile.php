@@ -24,17 +24,29 @@ class PatientProfile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function isLengkap(): bool
-    {
-        if (! $this->tanggal_lahir || ! $this->jenis_kelamin || ! $this->alamat || ! $this->jenis_pasien) {
-            return false;
-        }
-
-        return $this->jenis_pasien !== 'BPJS' || ! empty($this->no_bpjs);
-    }
-
     public function consultations()
     {
         return $this->hasMany(Consultation::class);
+    }
+
+    public function queues()
+    {
+        return $this->hasMany(Queue::class);
+    }
+
+    /**
+     * Memeriksa kelengkapan identitas profil pasien.
+     */
+    public function isLengkap(): bool
+    {
+        if (empty($this->tanggal_lahir) || empty($this->jenis_kelamin) || empty(trim($this->alamat ?? ''))) {
+            return false;
+        }
+
+        if (! empty($this->jenis_pasien) && $this->jenis_pasien === 'BPJS') {
+            return ! empty($this->no_bpjs);
+        }
+
+        return true;
     }
 }

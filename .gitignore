@@ -1,4 +1,6 @@
 /.phpunit.cache
+*.sqlite
+*.sqlite-journal
 /node_modules
 /public/build
 /public/hot
@@ -7,6 +9,7 @@
 /storage/pail
 /vendor
 .env
+.env.dusk.local
 .env.backup
 .env.production
 .phpactor.json

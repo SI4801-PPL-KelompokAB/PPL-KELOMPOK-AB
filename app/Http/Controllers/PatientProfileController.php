@@ -20,7 +20,8 @@ class PatientProfileController extends Controller
         $profil->update($request->validated());
 
         return redirect()->route('pasien.profil.edit')
-            ->with('success', 'Profil berhasil disimpan.');
+            ->with('success', 'Profil berhasil disimpan.')
+            ->with('sukses', 'Profil identitas pasien berhasil diperbarui.');
     }
 
     private function profilPasien()
@@ -29,6 +30,6 @@ class PatientProfileController extends Controller
 
         abort_unless($user?->role === 'pasien', 403);
 
-        return $user->patientProfile;
+        return $user->patientProfile ?: $user->patientProfile()->firstOrCreate([]);
     }
 }
