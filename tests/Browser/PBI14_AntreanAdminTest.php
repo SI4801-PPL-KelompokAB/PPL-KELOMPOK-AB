@@ -12,6 +12,19 @@ use Tests\DuskTestCase;
 class PBI14_AntreanAdminTest extends DuskTestCase
 {
     /**
+     * Helper untuk mengetik teks karakter demi karakter agar terlihat pelan saat demo.
+     */
+    protected function ketikPelan(Browser $browser, string $selector, string $teks, int $jedaMs = 150): void
+    {
+        $browser->clear($selector);
+
+        foreach (str_split($teks) as $karakter) {
+            $browser->keys($selector, $karakter)
+                ->pause($jedaMs);
+        }
+    }
+
+    /**
      * Helper untuk mengambil akun Admin dan data antrean dari database seeder
      * agar setiap test case berjalan mandiri dan bersih.
      */
@@ -48,13 +61,22 @@ class PBI14_AntreanAdminTest extends DuskTestCase
      */
     protected function loginSebagaiAdmin(Browser $browser, User $admin): void
     {
+        $noHp = $admin->no_hp ?? '081234567890';
+
         $browser->visit('/login')
-            ->pause(2000)
-            ->type('no_hp', $admin->no_hp ?? '081234567890')
-            ->type('password', 'password123')
-            ->press('Masuk')
-            ->waitForLocation('/admin/dashboard', 100)
             ->pause(2000);
+
+        // Ketik nomor HP pelan-pelan (jeda 150ms per angka)
+        $this->ketikPelan($browser, 'input[name="no_hp"]', $noHp, 150);
+        $browser->pause(1000);
+
+        // Ketik password pelan-pelan (jeda 150ms per huruf)
+        $this->ketikPelan($browser, 'input[name="password"]', 'password123', 150);
+        $browser->pause(1500);
+
+        $browser->press('Masuk')
+            ->waitForLocation('/admin/dashboard', 10000)
+            ->pause(3000);
     }
 
     /**
@@ -62,7 +84,7 @@ class PBI14_AntreanAdminTest extends DuskTestCase
      */
     public function test_tc01_admin_melihat_daftar_antrean_harian(): void
     {
-        [$admin, $pasienUser, , $queue] = $this->siapkanDataUjiAntrean();
+        [$admin, $pasienUser,, $queue] = $this->siapkanDataUjiAntrean();
 
         $this->browse(function (Browser $browser) use ($admin, $pasienUser, $queue) {
             $browser->driver->manage()->deleteAllCookies();
@@ -72,8 +94,8 @@ class PBI14_AntreanAdminTest extends DuskTestCase
 
             // 2. Klik menu Antrean di navbar atas dan verifikasi daftar antrean tampil
             $browser->clickLink('Antrean')
-                ->waitForLocation('/admin/antrean', 100)
-                ->pause(2000)
+                ->waitForLocation('/admin/antrean', 1000)
+                ->pause(3000)
                 ->assertSee('Kelola Antrean Pasien')
                 ->assertSee($queue->formatted_nomor)
                 ->assertSee($pasienUser->name)
@@ -96,11 +118,11 @@ class PBI14_AntreanAdminTest extends DuskTestCase
 
             // 2. Buka halaman antrean dan jalankan filter Poli & Status
             $browser->visit('/admin/antrean')
-                ->pause(2000)
+                ->pause(3000)
                 ->select('poli', (string) $poli->id)
                 ->select('status', 'waiting')
                 ->press('Filter')
-                ->pause(2000)
+                ->pause(3000)
                 ->assertSee($queue->formatted_nomor)
                 ->assertSee($pasienUser->name);
         });
@@ -111,7 +133,7 @@ class PBI14_AntreanAdminTest extends DuskTestCase
      */
     public function test_tc03_admin_mengubah_status_waiting_ke_serving(): void
     {
-        [$admin, $pasienUser, , $queue] = $this->siapkanDataUjiAntrean();
+        [$admin, $pasienUser,, $queue] = $this->siapkanDataUjiAntrean();
 
         $this->browse(function (Browser $browser) use ($admin, $pasienUser, $queue) {
             $browser->driver->manage()->deleteAllCookies();
@@ -121,10 +143,10 @@ class PBI14_AntreanAdminTest extends DuskTestCase
 
             // 2. Klik tombol Layani (Serve) pada antrean yang berstatus waiting
             $browser->visit('/admin/antrean')
-                ->pause(2000)
+                ->pause(3000)
                 ->assertSee($pasienUser->name)
                 ->press('Layani (Serve)')
-                ->pause(2000)
+                ->pause(3000)
                 ->assertSee('Sedang Dilayani')
                 ->assertSee('berhasil diubah menjadi Sedang Dilayani');
 
@@ -141,7 +163,7 @@ class PBI14_AntreanAdminTest extends DuskTestCase
      */
     public function test_tc04_admin_mengubah_status_serving_ke_completed(): void
     {
-        [$admin, $pasienUser, , $queue] = $this->siapkanDataUjiAntrean();
+        [$admin, $pasienUser,, $queue] = $this->siapkanDataUjiAntrean();
 
         // Kondisi awal: antrean sudah berstatus 'serving'
         $queue->update(['status' => Queue::STATUS_SERVING]);
@@ -154,10 +176,10 @@ class PBI14_AntreanAdminTest extends DuskTestCase
 
             // 2. Klik tombol Selesai (Done) pada antrean yang sedang dilayani
             $browser->visit('/admin/antrean')
-                ->pause(2000)
+                ->pause(3000)
                 ->assertSee($pasienUser->name)
                 ->press('Selesai (Done)')
-                ->pause(2000)
+                ->pause(3000)
                 ->assertSee('Selesai')
                 ->assertSee('berhasil diubah menjadi Selesai');
 
@@ -184,7 +206,7 @@ class PBI14_AntreanAdminTest extends DuskTestCase
 
             // 2. Buka halaman antrean untuk tanggal yang kosong (tidak ada pasien daftar)
             $browser->visit('/admin/antrean?tanggal=2027-12-31')
-                ->pause(2000)
+                ->pause(3000)
                 ->assertSee('Belum ada data antrean pasien untuk filter ini.');
         });
     }
@@ -194,7 +216,7 @@ class PBI14_AntreanAdminTest extends DuskTestCase
      */
     public function test_tc06_pembaruan_status_tidak_valid_ditolak(): void
     {
-        [$admin, , , $queue] = $this->siapkanDataUjiAntrean();
+        [$admin,,, $queue] = $this->siapkanDataUjiAntrean();
 
         $this->browse(function (Browser $browser) use ($admin, $queue) {
             $browser->driver->manage()->deleteAllCookies();
@@ -203,7 +225,7 @@ class PBI14_AntreanAdminTest extends DuskTestCase
             $this->loginSebagaiAdmin($browser, $admin);
 
             $browser->visit('/admin/antrean')
-                ->pause(2000);
+                ->pause(3000);
 
             // 2. Simulasi pengiriman nilai status tidak valid pada form ubah status
             $browser->script("
@@ -214,7 +236,7 @@ class PBI14_AntreanAdminTest extends DuskTestCase
                 }
             ");
 
-            $browser->pause(2000)
+            $browser->pause(3000)
                 ->assertSee('Terdapat kesalahan pada input:');
 
             // 3. Pastikan status di database tetap 'waiting' (tidak berubah)

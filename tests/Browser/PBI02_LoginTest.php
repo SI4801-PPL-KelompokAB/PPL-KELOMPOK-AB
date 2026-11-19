@@ -9,6 +9,19 @@ use Tests\DuskTestCase;
 class PBI02_LoginTest extends DuskTestCase
 {
     /**
+     * Helper untuk mengetik teks karakter demi karakter agar terlihat pelan saat demo.
+     */
+    protected function ketikPelan(Browser $browser, string $selector, string $teks, int $jedaMs = 120): void
+    {
+        $browser->clear($selector);
+
+        foreach (str_split($teks) as $karakter) {
+            $browser->keys($selector, $karakter)
+                    ->pause($jedaMs);
+        }
+    }
+
+    /**
      * Mengambil akun pasien hasil registrasi dari PBI01_RegisTest.
      * Fallback ke akun pasien seeder (081299999999 / password) jika PBI01 belum dijalankan.
      */
@@ -64,13 +77,16 @@ class PBI02_LoginTest extends DuskTestCase
             $this->clearSession($browser);
 
             $browser->visit('/login')
-                    ->pause(1500)
-                    ->type('no_hp', $pasien['no_hp'])
-                    ->pause(1000)
-                    ->type('password', $pasien['password'])
-                    ->pause(1000)
-                    ->click('button[type="submit"]')
-                    ->waitForLocation('/pasien/dashboard')
+                    ->pause(1500);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $pasien['no_hp']);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', $pasien['password']);
+            $browser->pause(1000);
+
+            $browser->click('button[type="submit"]')
+                    ->waitForLocation('/pasien/dashboard', 10000)
                     ->assertPathIs('/pasien/dashboard')
                     ->pause(2000);
         });
@@ -88,13 +104,16 @@ class PBI02_LoginTest extends DuskTestCase
             $this->clearSession($browser);
 
             $browser->visit('/login')
-                    ->pause(1500)
-                    ->type('no_hp', $staff['petugas_no_hp'])
-                    ->pause(1000)
-                    ->type('password', $staff['petugas_password'])
-                    ->pause(1000)
-                    ->click('button[type="submit"]')
-                    ->waitForLocation('/dokter/konsultasi')
+                    ->pause(1500);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $staff['petugas_no_hp']);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', $staff['petugas_password']);
+            $browser->pause(1000);
+
+            $browser->click('button[type="submit"]')
+                    ->waitForLocation('/dokter/konsultasi', 10000)
                     ->assertPathIs('/dokter/konsultasi')
                     ->pause(2000);
         });
@@ -112,13 +131,16 @@ class PBI02_LoginTest extends DuskTestCase
             $this->clearSession($browser);
 
             $browser->visit('/login')
-                    ->pause(1500)
-                    ->type('no_hp', $staff['admin_no_hp'])
-                    ->pause(1000)
-                    ->type('password', $staff['admin_password'])
-                    ->pause(1000)
-                    ->click('button[type="submit"]')
-                    ->waitForLocation('/admin/dashboard')
+                    ->pause(1500);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $staff['admin_no_hp']);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', $staff['admin_password']);
+            $browser->pause(1000);
+
+            $browser->click('button[type="submit"]')
+                    ->waitForLocation('/admin/dashboard', 10000)
                     ->assertPathIs('/admin/dashboard')
                     ->pause(2000);
         });
@@ -134,13 +156,16 @@ class PBI02_LoginTest extends DuskTestCase
             $this->clearSession($browser);
 
             $browser->visit('/login')
-                    ->pause(1500)
-                    ->type('no_hp', '089999999999')
-                    ->pause(1000)
-                    ->type('password', 'password123')
-                    ->pause(1000)
-                    ->click('button[type="submit"]')
-                    ->waitForLocation('/login')
+                    ->pause(1500);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', '089999999999');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', 'password123');
+            $browser->pause(1000);
+
+            $browser->click('button[type="submit"]')
+                    ->waitForLocation('/login', 10000)
                     ->assertSee('Nomor telepon atau password salah.')
                     ->pause(2000);
         });
@@ -158,13 +183,16 @@ class PBI02_LoginTest extends DuskTestCase
             $this->clearSession($browser);
 
             $browser->visit('/login')
-                    ->pause(1500)
-                    ->type('no_hp', $pasien['no_hp'])
-                    ->pause(1000)
-                    ->type('password', 'passwordsalah999')
-                    ->pause(1000)
-                    ->click('button[type="submit"]')
-                    ->waitForLocation('/login')
+                    ->pause(1500);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $pasien['no_hp']);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', 'passwordsalah999');
+            $browser->pause(1000);
+
+            $browser->click('button[type="submit"]')
+                    ->waitForLocation('/login', 10000)
                     ->assertSee('Nomor telepon atau password salah.')
                     ->pause(2000);
         });
@@ -180,10 +208,12 @@ class PBI02_LoginTest extends DuskTestCase
             $this->clearSession($browser);
 
             $browser->visit('/login')
-                    ->pause(1500)
-                    ->type('password', 'password123')
-                    ->pause(1000)
-                    ->click('button[type="submit"]')
+                    ->pause(1500);
+
+            $this->ketikPelan($browser, 'input[name="password"]', 'password123');
+            $browser->pause(1000);
+
+            $browser->click('button[type="submit"]')
                     ->pause(1500)
                     ->assertPathIs('/login')
                     ->pause(1500);
@@ -202,10 +232,12 @@ class PBI02_LoginTest extends DuskTestCase
             $this->clearSession($browser);
 
             $browser->visit('/login')
-                    ->pause(1500)
-                    ->type('no_hp', $pasien['no_hp'])
-                    ->pause(1000)
-                    ->click('button[type="submit"]')
+                    ->pause(1500);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $pasien['no_hp']);
+            $browser->pause(1000);
+
+            $browser->click('button[type="submit"]')
                     ->pause(1500)
                     ->assertPathIs('/login')
                     ->pause(1500);
@@ -240,15 +272,19 @@ class PBI02_LoginTest extends DuskTestCase
             $this->clearSession($browser);
 
             $browser->visit('/login')
-                    ->pause(1500)
-                    ->type('no_hp', str_repeat('0', 300))
-                    ->pause(1000)
-                    ->type('password', 'password123')
-                    ->pause(1000)
-                    ->click('button[type="submit"]')
+                    ->pause(1500);
+
+            // Jeda 5ms per angka khusus input 300 karakter agar tetap terlihat mengalir tanpa terlalu lama
+            $this->ketikPelan($browser, 'input[name="no_hp"]', str_repeat('0', 300), 5);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', 'password123');
+            $browser->pause(1000);
+
+            $browser->click('button[type="submit"]')
                     ->pause(1500)
                     ->visit('/dashboard')
-                    ->waitForLocation('/login')
+                    ->waitForLocation('/login', 10000)
                     ->assertPathIs('/login')
                     ->pause(1500);
         });
@@ -267,39 +303,48 @@ class PBI02_LoginTest extends DuskTestCase
             // 1. Pasien (dari PBI01_RegisTest) -> Dashboard Pasien
             $this->clearSession($browser);
             $browser->visit('/login')
-                    ->pause(1000)
-                    ->type('no_hp', $pasien['no_hp'])
-                    ->pause(800)
-                    ->type('password', $pasien['password'])
-                    ->pause(800)
-                    ->click('button[type="submit"]')
-                    ->waitForLocation('/pasien/dashboard')
+                    ->pause(1000);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $pasien['no_hp']);
+            $browser->pause(600);
+
+            $this->ketikPelan($browser, 'input[name="password"]', $pasien['password']);
+            $browser->pause(800);
+
+            $browser->click('button[type="submit"]')
+                    ->waitForLocation('/pasien/dashboard', 10000)
                     ->assertPathIs('/pasien/dashboard')
                     ->pause(1500);
 
             // 2. Petugas (dr. Andi) -> Dashboard Petugas
             $this->clearSession($browser);
             $browser->visit('/login')
-                    ->pause(1000)
-                    ->type('no_hp', $staff['petugas_no_hp'])
-                    ->pause(800)
-                    ->type('password', $staff['petugas_password'])
-                    ->pause(800)
-                    ->click('button[type="submit"]')
-                    ->waitForLocation('/dokter/konsultasi')
+                    ->pause(1000);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $staff['petugas_no_hp']);
+            $browser->pause(600);
+
+            $this->ketikPelan($browser, 'input[name="password"]', $staff['petugas_password']);
+            $browser->pause(800);
+
+            $browser->click('button[type="submit"]')
+                    ->waitForLocation('/dokter/konsultasi', 10000)
                     ->assertPathIs('/dokter/konsultasi')
                     ->pause(1500);
 
             // 3. Admin (Admin Bonamu) -> Dashboard Admin
             $this->clearSession($browser);
             $browser->visit('/login')
-                    ->pause(1000)
-                    ->type('no_hp', $staff['admin_no_hp'])
-                    ->pause(800)
-                    ->type('password', $staff['admin_password'])
-                    ->pause(800)
-                    ->click('button[type="submit"]')
-                    ->waitForLocation('/admin/dashboard')
+                    ->pause(1000);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $staff['admin_no_hp']);
+            $browser->pause(600);
+
+            $this->ketikPelan($browser, 'input[name="password"]', $staff['admin_password']);
+            $browser->pause(800);
+
+            $browser->click('button[type="submit"]')
+                    ->waitForLocation('/admin/dashboard', 10000)
                     ->assertPathIs('/admin/dashboard')
                     ->pause(1500);
         });
