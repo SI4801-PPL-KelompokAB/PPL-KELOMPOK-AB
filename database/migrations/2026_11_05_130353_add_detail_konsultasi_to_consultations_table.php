@@ -31,11 +31,16 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('consultations', function (Blueprint $table) {
+            // Hapus foreign key doctor_schedule_id dulu, baru index-nya
+            $table->dropForeign(['doctor_schedule_id']);
             $table->dropIndex(['doctor_schedule_id', 'tanggal_konsultasi']);
+
+            // Foreign key doctor_id butuh index; buat penggantinya sebelum index gabungan dihapus
+            $table->index('doctor_id');
             $table->dropIndex(['doctor_id', 'status']);
+
             $table->dropUnique(['nomor_konsultasi']);
-            $table->dropConstrainedForeignId('doctor_schedule_id');
-            $table->dropColumn(['tanggal_konsultasi', 'keluhan', 'nomor_konsultasi']);
+            $table->dropColumn(['doctor_schedule_id', 'tanggal_konsultasi', 'keluhan', 'nomor_konsultasi']);
         });
     }
 };

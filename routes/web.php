@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\AdminQueueController;
 use App\Http\Controllers\Admin\CabangController;
 use App\Http\Controllers\Admin\PoliController;
 use App\Http\Controllers\AuthController;
@@ -73,6 +74,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // halaman dashboard admin
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
+    // kelola antrean pasien oleh admin
+    Route::get('/antrean', [AdminQueueController::class, 'index'])->name('antrean.index');
+    Route::patch('/antrean/{queue}/status', [AdminQueueController::class, 'updateStatus'])->name('antrean.update-status');
+
     // halaman edit profil admin
     Route::get('/profil', [AdminProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [AdminProfileController::class, 'update'])->name('profil.update');
@@ -136,9 +141,13 @@ Route::middleware(['auth', 'role:pasien'])->group(function () {
         Route::get('/buat', [KonsultasiOnlineController::class, 'create'])->name('create');
         Route::post('/', [KonsultasiOnlineController::class, 'store'])->name('store');
         Route::get('/{consultation}', [KonsultasiOnlineController::class, 'show'])->name('show');
-        Route::get('/{consultation}/ruang', [RuangKonsultasiController::class, 'show'])->name('ruang');
-        Route::post('/{consultation}/pesan', [RuangKonsultasiController::class, 'kirim'])->name('pesan');
     });
+});
+
+// ruang konsultasi (pbi 10 & pbi 11): dipakai bersama oleh pasien dan dokter
+Route::middleware('auth')->prefix('konsultasi')->name('konsultasi.')->group(function () {
+    Route::get('/{consultation}/ruang', [RuangKonsultasiController::class, 'show'])->name('ruang');
+    Route::post('/{consultation}/pesan', [RuangKonsultasiController::class, 'kirim'])->name('pesan');
 });
 
 // pbi 11: penanganan konsultasi online dari sisi dokter

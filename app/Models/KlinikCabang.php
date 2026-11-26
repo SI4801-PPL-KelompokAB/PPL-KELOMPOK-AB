@@ -22,4 +22,9 @@ class KlinikCabang extends Model
     {
         return $this->hasMany(Poli::class);
     }
+
+    public function layanans()
+    {
+        return $this->hasMany(Layanan::class);
+    }
 }

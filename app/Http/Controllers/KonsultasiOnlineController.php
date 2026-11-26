@@ -91,7 +91,8 @@ class KonsultasiOnlineController extends Controller
                 ->first();
 
             if (! $jadwal) {
-                $this->tolak('doctor_schedule_id', 'Dokter tidak praktik pada tanggal yang dipilih.');
+                // TC-11
+                $this->tolak('doctor_schedule_id', 'Tanggal tidak sesuai jadwal dokter');
             }
 
             if ($tanggal->isToday() && now()->format('H:i:s') > $jadwal->jam_selesai) {
@@ -101,7 +102,8 @@ class KonsultasiOnlineController extends Controller
             $konsultasiAktif = $this->queryKuotaTerpakai($jadwal->id, $tanggal);
 
             if ((clone $konsultasiAktif)->count() >= $jadwal->kuota) {
-                $this->tolak('doctor_schedule_id', 'Kuota konsultasi untuk jadwal ini sudah penuh.');
+                // TC-06
+                $this->tolak('doctor_schedule_id', 'Kuota jadwal sudah penuh');
             }
 
             $ganda = (clone $konsultasiAktif)
@@ -109,7 +111,8 @@ class KonsultasiOnlineController extends Controller
                 ->exists();
 
             if ($ganda) {
-                $this->tolak('doctor_schedule_id', 'Kamu sudah memiliki konsultasi pada jadwal dan tanggal tersebut.');
+                // TC-08
+                $this->tolak('doctor_schedule_id', 'Anda sudah memiliki konsultasi pada jadwal ini');
             }
 
             // Nomor konsultasi: KON-YYYYMMDD-XXXX
@@ -135,7 +138,7 @@ class KonsultasiOnlineController extends Controller
 
         return redirect()
             ->route('konsultasi.show', $konsultasi)
-            ->with('success', 'Konsultasi berhasil dibuat.');
+            ->with('sukses', 'Konsultasi berhasil dibuat.');
     }
 
     public function show(Consultation $consultation)

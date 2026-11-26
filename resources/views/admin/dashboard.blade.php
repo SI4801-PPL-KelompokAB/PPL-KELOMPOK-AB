@@ -17,6 +17,9 @@
                 </p>
             </div>
             <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.antrean.index') }}" class="btn btn-warning btn-sm fw-bold text-dark rounded-pill px-3 py-2">
+                    <i class="bi bi-ticket-detailed-fill me-1"></i> Kelola Antrean
+                </a>
                 <a href="{{ route('admin.cabang.index') }}" class="btn btn-outline-light btn-sm fw-semibold rounded-pill px-3 py-2">
                     <i class="bi bi-buildings me-1"></i> Data Cabang
                 </a>
@@ -130,12 +133,12 @@
                 </div>
                 <div class="d-flex align-items-baseline gap-2">
                     <h2 class="fw-bold text-dark mb-0">{{ $antreanHariIni }}</h2>
-                    <small class="text-muted">Pasien Terdaftar</small>
+                    <small class="text-muted">Pasien Terdaftar ({{ $totalPasien }} Total)</small>
                 </div>
                 <div class="mt-3 pt-2 border-top">
-                    <span class="small text-muted">
-                        Total Pasien: <strong>{{ $totalPasien }}</strong>
-                    </span>
+                    <a href="{{ route('admin.antrean.index') }}" class="small text-decoration-none fw-semibold text-success">
+                        Kelola Antrean Hari Ini <i class="bi bi-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </div>

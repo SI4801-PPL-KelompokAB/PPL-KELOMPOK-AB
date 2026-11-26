@@ -9,6 +9,19 @@ use Tests\DuskTestCase;
 class PBI01_RegisTest extends DuskTestCase
 {
     /**
+     * Helper untuk mengetik teks karakter demi karakter agar terlihat pelan saat demo.
+     */
+    protected function ketikPelan(Browser $browser, string $selector, string $teks, int $jedaMs = 100): void
+    {
+        $browser->clear($selector);
+
+        foreach (str_split($teks) as $karakter) {
+            $browser->keys($selector, $karakter)
+                    ->pause($jedaMs);
+        }
+    }
+
+    /**
      * Normal Testing
      * TC-01: Registrasi dengan data valid
      */
@@ -22,25 +35,31 @@ class PBI01_RegisTest extends DuskTestCase
 
             $browser->visit('/register')
                     ->pause(2000)
-                    ->assertSee('Registrasi Pasien Baru')
-                    ->type('name', 'Pasien Valid TC01')
-                    ->pause(1500)
-                    ->type('email', $email)
-                    ->pause(1500)
-                    ->type('no_hp', $noHp)
-                    ->pause(1500)
-                    ->type('password', 'password123')
-                    ->pause(1500)
-                    ->type('password_confirmation', 'password123')
-                    ->pause(1500)
-                    ->press('Daftar Sekarang')
-                    ->waitForLocation('/login')
+                    ->assertSee('Registrasi Pasien Baru');
+
+            $this->ketikPelan($browser, 'input[name="name"]', 'Pasien Valid TC01');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="email"]', $email);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $noHp);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', $password);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password_confirmation"]', $password);
+            $browser->pause(1200);
+
+            $browser->press('Daftar Sekarang')
+                    ->waitForLocation('/login', 10000)
                     ->assertPathIs('/login')
                     ->assertSee('Registrasi berhasil! Silakan login.')
                     ->pause(2000);
 
-                    // Simpan akun pasien yang baru terdaftar agar bisa dipakai di PBI02_LoginTest
-                    file_put_contents(
+            // Simpan akun pasien yang baru terdaftar agar bisa dipakai di PBI02_LoginTest
+            file_put_contents(
                 storage_path('framework/testing/registered_pasien.json'),
                 json_encode([
                     'no_hp' => $noHp,
@@ -89,19 +108,25 @@ class PBI01_RegisTest extends DuskTestCase
             ]);
 
             $browser->visit('/register')
-                    ->pause(2000)
-                    ->type('name', 'Pasien Duplikat HP')
-                    ->pause(1500)
-                    ->type('email', "baru{$unique}@test.com")
-                    ->pause(1500)
-                    ->type('no_hp', $existingNoHp)
-                    ->pause(1500)
-                    ->type('password', 'password123')
-                    ->pause(1500)
-                    ->type('password_confirmation', 'password123')
-                    ->pause(1500)
-                    ->press('Daftar Sekarang')
-                    ->waitForLocation('/register')
+                    ->pause(2000);
+
+            $this->ketikPelan($browser, 'input[name="name"]', 'Pasien Duplikat HP');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="email"]', "baru{$unique}@test.com");
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', $existingNoHp);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', 'password123');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password_confirmation"]', 'password123');
+            $browser->pause(1200);
+
+            $browser->press('Daftar Sekarang')
+                    ->waitForLocation('/register', 10000)
                     ->assertSee('Nomor telepon sudah terdaftar.')
                     ->pause(2000);
         });
@@ -117,20 +142,26 @@ class PBI01_RegisTest extends DuskTestCase
             $unique = time() + 20;
 
             $browser->visit('/register')
-                    ->pause(2000)
-                    ->type('name', 'Pasien Format HP Salah')
-                    ->pause(1500)
-                    ->type('email', "format{$unique}@test.com")
-                    ->pause(1500)
-                    // Menguji input melebihi batas max:20 karakter sesuai aturan di AuthController
-                    ->type('no_hp', '0812345678901234567890123')
-                    ->pause(1500)
-                    ->type('password', 'password123')
-                    ->pause(1500)
-                    ->type('password_confirmation', 'password123')
-                    ->pause(1500)
-                    ->press('Daftar Sekarang')
-                    ->waitForLocation('/register')
+                    ->pause(2000);
+
+            $this->ketikPelan($browser, 'input[name="name"]', 'Pasien Format HP Salah');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="email"]', "format{$unique}@test.com");
+            $browser->pause(800);
+
+            // Menguji input melebihi batas max:20 karakter sesuai aturan di AuthController
+            $this->ketikPelan($browser, 'input[name="no_hp"]', '0812345678901234567890123');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', 'password123');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password_confirmation"]', 'password123');
+            $browser->pause(1200);
+
+            $browser->press('Daftar Sekarang')
+                    ->waitForLocation('/register', 10000)
                     ->assertPresent('.alert-danger')
                     ->pause(2000);
         });
@@ -146,19 +177,25 @@ class PBI01_RegisTest extends DuskTestCase
             $unique = time() + 30;
 
             $browser->visit('/register')
-                    ->pause(2000)
-                    ->type('name', 'Pasien Password Beda')
-                    ->pause(1500)
-                    ->type('email', "beda{$unique}@test.com")
-                    ->pause(1500)
-                    ->type('no_hp', '08' . substr($unique, -10))
-                    ->pause(1500)
-                    ->type('password', 'password123')
-                    ->pause(1500)
-                    ->type('password_confirmation', 'password999')
-                    ->pause(1500)
-                    ->press('Daftar Sekarang')
-                    ->waitForLocation('/register')
+                    ->pause(2000);
+
+            $this->ketikPelan($browser, 'input[name="name"]', 'Pasien Password Beda');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="email"]', "beda{$unique}@test.com");
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', '08' . substr($unique, -10));
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', 'password123');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password_confirmation"]', 'password999');
+            $browser->pause(1200);
+
+            $browser->press('Daftar Sekarang')
+                    ->waitForLocation('/register', 10000)
                     ->assertSee('Konfirmasi password tidak cocok.')
                     ->pause(2000);
         });
@@ -174,19 +211,25 @@ class PBI01_RegisTest extends DuskTestCase
             $unique = time() + 40;
 
             $browser->visit('/register')
-                    ->pause(2000)
-                    ->type('name', 'Pasien Password Pendek')
-                    ->pause(1500)
-                    ->type('email', "pendek{$unique}@test.com")
-                    ->pause(1500)
-                    ->type('no_hp', '08' . substr($unique, -10))
-                    ->pause(1500)
-                    ->type('password', '12345')
-                    ->pause(1500)
-                    ->type('password_confirmation', '12345')
-                    ->pause(1500)
-                    ->press('Daftar Sekarang')
-                    ->waitForLocation('/register')
+                    ->pause(2000);
+
+            $this->ketikPelan($browser, 'input[name="name"]', 'Pasien Password Pendek');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="email"]', "pendek{$unique}@test.com");
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', '08' . substr($unique, -10));
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', '12345');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password_confirmation"]', '12345');
+            $browser->pause(1200);
+
+            $browser->press('Daftar Sekarang')
+                    ->waitForLocation('/register', 10000)
                     ->assertSee('Password minimal 8 karakter.')
                     ->pause(2000);
         });
@@ -202,21 +245,26 @@ class PBI01_RegisTest extends DuskTestCase
             $unique = time() + 50;
             $emailGagal = "dbfail{$unique}@test.com";
 
-            // Simulasi kondisi kegagalan penyimpanan: input karakter emoji 4-byte / karakter khusus
-            // atau panjang ekstrem jika kolom DB tidak mendukung, dan memastikan data tidak tersimpan
             $browser->visit('/register')
-                    ->pause(2000)
-                    ->type('name', str_repeat('A', 260)) // Melebihi batas kolom VARCHAR(255)
-                    ->pause(1500)
-                    ->type('email', $emailGagal)
-                    ->pause(1500)
-                    ->type('no_hp', '08' . substr($unique, -10))
-                    ->pause(1500)
-                    ->type('password', 'password123')
-                    ->pause(1500)
-                    ->type('password_confirmation', 'password123')
-                    ->pause(1500)
-                    ->press('Daftar Sekarang')
+                    ->pause(2000);
+
+            // Jeda 5ms per huruf khusus input 260 karakter agar tetap terlihat mengalir tanpa terlalu lama
+            $this->ketikPelan($browser, 'input[name="name"]', str_repeat('A', 260), 5);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="email"]', $emailGagal);
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="no_hp"]', '08' . substr($unique, -10));
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password"]', 'password123');
+            $browser->pause(800);
+
+            $this->ketikPelan($browser, 'input[name="password_confirmation"]', 'password123');
+            $browser->pause(1200);
+
+            $browser->press('Daftar Sekarang')
                     ->pause(1500);
 
             // Pastikan sistem menolak penyimpanan dan akun tidak masuk ke tabel users
