@@ -12,17 +12,20 @@ use App\Services\DoctorScheduleService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+// =========================================================================
+// pbi 07 (spk-36): controller kelola jadwal praktik dokter (admin)
+// =========================================================================
 class DoctorScheduleController extends Controller
 {
     protected DoctorScheduleService $scheduleService;
 
-    // hubungkan controller dengan service logika jadwal dokter
+    // [pbi 07] hubungkan controller dengan service logika jadwal dokter
     public function __construct(DoctorScheduleService $scheduleService)
     {
         $this->scheduleService = $scheduleService;
     }
 
-    // tampilkan halaman daftar jadwal praktik dokter beserta filter pencarian
+    // [pbi 07] tampilkan halaman daftar jadwal praktik dokter beserta filter pencarian
     public function index(Request $request)
     {
         $query = DoctorSchedule::with(['doctor.user', 'poli']);
@@ -60,7 +63,7 @@ class DoctorScheduleController extends Controller
         return view('admin.jadwal.index', compact('schedules', 'doctors', 'polis', 'daftarHari'));
     }
 
-    // tampilkan halaman form tambah jadwal praktik baru
+    // [pbi 07 - spk-36] tampilkan halaman form tambah jadwal praktik baru
     public function create()
     {
         $doctors = Doctor::with('user')->get();
@@ -70,7 +73,7 @@ class DoctorScheduleController extends Controller
         return view('admin.jadwal.create', compact('doctors', 'polis', 'daftarHari'));
     }
 
-    // simpan jadwal baru ke database lewat service (kalau jam bentrok, tangkap error-nya)
+    // [pbi 07 - spk-36] simpan jadwal baru ke database lewat service (kalau jam bentrok, tangkap error-nya)
     public function store(StoreDoctorScheduleRequest $request)
     {
         try {
@@ -83,7 +86,7 @@ class DoctorScheduleController extends Controller
         }
     }
 
-    // tampilkan halaman form edit jadwal praktik yang dipilih
+    // [pbi 07 - spk-36] tampilkan halaman form edit jadwal praktik yang dipilih
     public function edit(DoctorSchedule $doctorSchedule)
     {
         $doctors = Doctor::with('user')->get();
@@ -97,7 +100,7 @@ class DoctorScheduleController extends Controller
         return view('admin.jadwal.edit', compact('doctorSchedule', 'doctors', 'polis', 'daftarHari'));
     }
 
-    // simpan perubahan edit jadwal ke database lewat service
+    // [pbi 07 - spk-36] simpan perubahan edit jadwal ke database lewat service
     public function update(UpdateDoctorScheduleRequest $request, DoctorSchedule $doctorSchedule)
     {
         try {
@@ -110,7 +113,7 @@ class DoctorScheduleController extends Controller
         }
     }
 
-    // ubah status jadwal jadi aktif atau nonaktif tanpa menghapus datanya dari database
+    // [pbi 07 - spk-36] ubah status jadwal jadi aktif atau nonaktif tanpa menghapus datanya dari database
     public function destroy(DoctorSchedule $doctorSchedule)
     {
         try {
@@ -127,7 +130,7 @@ class DoctorScheduleController extends Controller
         }
     }
 
-    // panggil fungsi ubah status aktif atau nonaktif jadwal
+    // [pbi 07 - spk-36] panggil fungsi ubah status aktif atau nonaktif jadwal
     public function toggleStatus(DoctorSchedule $doctorSchedule)
     {
         return $this->destroy($doctorSchedule);

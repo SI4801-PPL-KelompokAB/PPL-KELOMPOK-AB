@@ -79,9 +79,24 @@
                                 @endif
                             </td>
                             <td class="pe-3 text-end">
-                                <a href="{{ route('antrean.show', $item) }}" class="btn btn-outline-primary btn-sm" dusk="lihat-tiket-{{ $item->id }}">
-                                    <i class="bi bi-ticket-perforated me-1"></i> Lihat Tiket
-                                </a>
+                                <div class="d-inline-flex gap-1">
+                                    {{-- [pbi 09 - spk-4] tombol lihat tiket --}}
+                                    <a href="{{ route('antrean.show', $item) }}" class="btn btn-outline-primary btn-sm" dusk="lihat-tiket-{{ $item->id }}">
+                                        <i class="bi bi-ticket-perforated me-1"></i> Lihat Tiket
+                                    </a>
+                                    {{-- [pbi 16 - spk-44] tombol reschedule & batalkan antrean --}}
+                                    @if($item->status === 'waiting')
+                                        <a href="{{ route('antrean.reschedule.form', $item) }}" class="btn btn-outline-warning btn-sm" title="Jadwalkan Ulang" dusk="reschedule-antrean-{{ $item->id }}">
+                                            <i class="bi bi-calendar2-range"></i>
+                                        </a>
+                                        <form action="{{ route('antrean.cancel', $item) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan nomor antrean ini?')">
+                                            @csrf
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Batalkan Antrean" dusk="batal-antrean-{{ $item->id }}">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

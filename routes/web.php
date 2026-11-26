@@ -85,7 +85,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('cabang', CabangController::class)->except(['show', 'destroy']);
     Route::patch('cabang/{cabang}/toggle-status', [CabangController::class, 'toggleStatus'])->name('cabang.toggle-status');
 
-    // pbi 07 (milik nara): kelola jadwal praktik dokter (lihat, tambah, edit, dan ubah status aktif/nonaktif)
+    // =====================================================================
+    // [pbi 07 - spk-36] milik nara: kelola jadwal praktik dokter (sprint 1)
+    // =====================================================================
     Route::resource('jadwal', DoctorScheduleController::class)
         ->parameters(['jadwal' => 'doctorSchedule'])
         ->except(['show']);
@@ -111,12 +113,22 @@ Route::middleware(['auth', 'role:pasien'])->group(function () {
         Route::put('/', [PatientProfileController::class, 'update'])->name('update');
     });
 
-    // pbi 09 (milik nara): pendaftaran antrean online dan lihat tiket antrean
+    // =====================================================================
+    // milik nara: antrean online pasien
+    // - [pbi 09 - spk-4] pendaftaran & lihat tiket antrean (sprint 1)
+    // - [pbi 16 - spk-44] pembatalan & reschedule antrean (sprint 2)
+    // =====================================================================
     Route::prefix('antrean')->name('antrean.')->group(function () {
+        // [pbi 09 - spk-4]
         Route::get('/', [QueueController::class, 'index'])->name('index');
         Route::get('/ambil', [QueueController::class, 'create'])->name('create');
         Route::post('/', [QueueController::class, 'store'])->name('store');
         Route::get('/{queue}', [QueueController::class, 'show'])->name('show');
+
+        // [pbi 16 - spk-44]
+        Route::get('/{queue}/reschedule', [QueueController::class, 'rescheduleForm'])->name('reschedule.form');
+        Route::put('/{queue}/reschedule', [QueueController::class, 'reschedule'])->name('reschedule');
+        Route::post('/{queue}/batal', [QueueController::class, 'cancel'])->name('cancel');
     });
 
     // pbi 10: konsultasi online dari sisi pasien

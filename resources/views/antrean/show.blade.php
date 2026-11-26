@@ -87,7 +87,20 @@
             </div>
         </div>
 
-        <div class="text-center mt-3 d-print-none">
+        <div class="d-flex justify-content-center gap-2 flex-wrap mt-3 d-print-none">
+            {{-- [pbi 16 - spk-44] tombol jadwalkan ulang & batalkan antrean (hanya muncul saat status waiting) --}}
+            @if($queue->status === 'waiting')
+                <a href="{{ route('antrean.reschedule.form', $queue) }}" class="btn btn-warning px-3 fw-semibold" dusk="btn-reschedule-antrean">
+                    <i class="bi bi-calendar2-range me-1"></i> Jadwalkan Ulang
+                </a>
+                <form action="{{ route('antrean.cancel', $queue) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan nomor antrean ini?')">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-danger px-3 fw-semibold" dusk="btn-batal-antrean">
+                        <i class="bi bi-x-circle me-1"></i> Batalkan Antrean
+                    </button>
+                </form>
+            @endif
+            {{-- [pbi 09 - spk-4] tombol kembali ke daftar antrean --}}
             <a href="{{ route('antrean.index') }}" class="btn btn-primary px-4">
                 <i class="bi bi-check-lg me-1"></i> Selesai
             </a>

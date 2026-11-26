@@ -9,6 +9,11 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
+// =========================================================================
+// service logika bisnis antrean online:
+// - pbi 09 (spk-4): pembuatan antrean online baru (sprint 1)
+// - pbi 16 (spk-44): pembatalan & reschedule antrean oleh pasien (sprint 2)
+// =========================================================================
 class QueueService
 {
     // daftar urutan angka hari iso (1 = senin sampai 7 = minggu)
@@ -22,7 +27,9 @@ class QueueService
         7 => 'minggu',
     ];
 
-    // proses utama pembuatan nomor antrean online pasien beserta 5 validasinya
+    // =====================================================================
+    // [pbi 09 - spk-4] proses utama pembuatan nomor antrean online pasien
+    // =====================================================================
     public function buatAntreanOnline(User $user, array $data): Queue
     {
         // 1. cek apakah profil identitas pasien sudah lengkap (tgl lahir, jenis kelamin, alamat)
@@ -72,8 +79,10 @@ class QueueService
                 ->lockForUpdate()
                 ->max('nomor_antrean') ?? 0;
 
+            // hitung kuota terpakai (antrean yang sudah dibatalkan/skipped tidak mengurangi kuota)
             $totalTerdaftar = Queue::where('doctor_schedule_id', $jadwal->id)
                 ->whereDate('tanggal_antrean', $tanggalString)
+                ->where('status', '!=', Queue::STATUS_SKIPPED)
                 ->count();
 
             // tolak kalau jumlah antrean sudah mencapai batas kuota jadwal dokter
@@ -91,6 +100,92 @@ class QueueService
                 'nomor_antrean' => $nomorAntreanBaru,
                 'status' => Queue::STATUS_WAITING,
             ]);
+        });
+    }
+
+    // =====================================================================
+    // [pbi 16 - spk-44] proses pembatalan antrean online oleh pasien
+    // =====================================================================
+    public function batalkanAntrean(Queue $queue): Queue
+    {
+        // hanya antrean yang masih berstatus menunggu (waiting) yang boleh dibatalkan
+        if ($queue->status !== Queue::STATUS_WAITING) {
+            throw new AturanBisnisException('Hanya antrean yang masih berstatus Menunggu yang dapat dibatalkan.');
+        }
+
+        // ubah status menjadi skipped (dibatalkan/dilewati) agar kuota jadwal kembali tersedia
+        $queue->update([
+            'status' => Queue::STATUS_SKIPPED,
+        ]);
+
+        return $queue;
+    }
+
+    // =====================================================================
+    // [pbi 16 - spk-44] proses penjadwalan ulang (reschedule) antrean pasien
+    // =====================================================================
+    public function rescheduleAntrean(Queue $queue, array $data): Queue
+    {
+        // 1. pastikan antrean masih berstatus menunggu (waiting)
+        if ($queue->status !== Queue::STATUS_WAITING) {
+            throw new AturanBisnisException('Hanya antrean yang masih berstatus Menunggu yang dapat dijadwalkan ulang.');
+        }
+
+        // 2. cek tanggal kunjungan baru tidak boleh tanggal masa lalu
+        $tanggalBaru = Carbon::parse($data['tanggal_antrean'])->startOfDay();
+        $hariIni = today()->startOfDay();
+
+        if ($tanggalBaru->lt($hariIni)) {
+            throw new AturanBisnisException('Tanggal antrean baru tidak boleh tanggal yang sudah lewat.');
+        }
+
+        $tanggalString = $tanggalBaru->toDateString();
+
+        // 3. tolak jika pasien memilih jadwal dan tanggal yang sama persis dengan antrean saat ini
+        if (
+            (int) $queue->doctor_schedule_id === (int) $data['doctor_schedule_id']
+            && $queue->tanggal_antrean->toDateString() === $tanggalString
+        ) {
+            throw new AturanBisnisException('Anda sudah terdaftar pada jadwal dan tanggal tersebut.');
+        }
+
+        // 4. cek jadwal dokter tujuan harus aktif dan sesuai hari dari tanggal baru
+        $jadwalBaru = DoctorSchedule::with('doctor.user', 'poli')->find($data['doctor_schedule_id']);
+        if (! $jadwalBaru || ! $jadwalBaru->status) {
+            throw new AturanBisnisException('Jadwal praktik dokter tujuan tidak ditemukan atau sedang nonaktif.');
+        }
+
+        $namaHariBaru = self::MAP_HARI[$tanggalBaru->dayOfWeekIso] ?? '';
+        if (strtolower($jadwalBaru->hari) !== $namaHariBaru) {
+            $namaDokter = $jadwalBaru->doctor->user->name ?? 'Dokter';
+            throw new AturanBisnisException("Dokter {$namaDokter} tidak praktik pada hari ".ucfirst($namaHariBaru).'.');
+        }
+
+        // 5. hitung nomor antrean baru dan cek kuota jadwal tujuan di dalam transaksi database
+        return DB::transaction(function () use ($queue, $jadwalBaru, $tanggalString) {
+            $lastNomor = Queue::where('doctor_schedule_id', $jadwalBaru->id)
+                ->whereDate('tanggal_antrean', $tanggalString)
+                ->lockForUpdate()
+                ->max('nomor_antrean') ?? 0;
+
+            $totalTerdaftar = Queue::where('doctor_schedule_id', $jadwalBaru->id)
+                ->whereDate('tanggal_antrean', $tanggalString)
+                ->where('status', '!=', Queue::STATUS_SKIPPED)
+                ->where('id', '!=', $queue->id)
+                ->count();
+
+            if ($totalTerdaftar >= $jadwalBaru->kuota) {
+                throw new AturanBisnisException('Jadwal Penuh. Kuota antrean untuk jadwal tersebut sudah habis.');
+            }
+
+            $queue->update([
+                'doctor_schedule_id' => $jadwalBaru->id,
+                'tanggal_antrean' => $tanggalString,
+                'nomor_antrean' => $lastNomor + 1,
+                'status' => Queue::STATUS_WAITING,
+            ]);
+
+            return $queue->fresh(['doctorSchedule.doctor.user', 'doctorSchedule.poli']);
         });
     }
 

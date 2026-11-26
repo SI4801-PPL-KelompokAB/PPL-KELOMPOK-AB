@@ -6,12 +6,15 @@ use App\Exceptions\AturanBisnisException;
 use App\Models\DoctorSchedule;
 use Carbon\Carbon;
 
+// =========================================================================
+// pbi 07 (spk-36): service logika bisnis kelola jadwal praktik dokter (admin)
+// =========================================================================
 class DoctorScheduleService
 {
-    // daftar pilihan hari praktik dokter yang valid
+    // [pbi 07] daftar pilihan hari praktik dokter yang valid
     public const HARI = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
 
-    // buat jadwal praktik baru setelah lolos pengecekan aturan bisnis
+    // [pbi 07] buat jadwal praktik baru setelah lolos pengecekan aturan bisnis
     public function buatJadwal(array $data): DoctorSchedule
     {
         $this->validasiAturanJadwal($data);
@@ -27,7 +30,7 @@ class DoctorScheduleService
         ]);
     }
 
-    // simpan perubahan edit jadwal setelah lolos pengecekan aturan bisnis
+    // [pbi 07] simpan perubahan edit jadwal setelah lolos pengecekan aturan bisnis
     public function perbaruiJadwal(DoctorSchedule $schedule, array $data): DoctorSchedule
     {
         $this->validasiAturanJadwal($data, $schedule->id);
@@ -45,7 +48,7 @@ class DoctorScheduleService
         return $schedule;
     }
 
-    // ubah status jadwal (aktif <-> nonaktif) tanpa menghapus data dari database
+    // [pbi 07] ubah status jadwal (aktif <-> nonaktif) tanpa menghapus data dari database
     public function toggleStatus(DoctorSchedule $schedule): DoctorSchedule
     {
         $statusBaru = ! $schedule->status;
@@ -66,7 +69,7 @@ class DoctorScheduleService
         return $schedule;
     }
 
-    // validasi 3 aturan utama jadwal praktik dokter
+    // [pbi 07] validasi 3 aturan utama jadwal praktik dokter
     public function validasiAturanJadwal(array $data, ?int $excludeScheduleId = null): void
     {
         $jamMulai = Carbon::parse($data['jam_mulai'])->format('H:i:s');
@@ -92,7 +95,7 @@ class DoctorScheduleService
         }
     }
 
-    // rumus pengecekan apakah dua jadwal dokter bertabrakan jamnya di hari yang sama
+    // [pbi 07] rumus pengecekan apakah dua jadwal dokter bertabrakan jamnya di hari yang sama
     public function cekJadwalBentrok(
         int $doctorId,
         string $hari,
