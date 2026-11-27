@@ -17,10 +17,10 @@ use Illuminate\Database\Seeder;
  *
  * Akun uji (login pakai nomor telepon):
  * - Pasien  Budi Santoso : 081299999999 / password
- * - Dokter  dr. Andi     : 081200000001 / password
- * - Dokter  dr. Sari     : 081200000002 / password
- * - Dokter  drg. Budi    : 081200000003 / password
- * - Dokter  dr. Rina     : 081200000004 / password
+ * - Dokter  dr. Andi     : 081200000001 / password  (Poli Umum, 07:00-23:00)
+ * - Dokter  dr. Sari     : 081200000002 / password  (Poli Umum, 15:00-23:00)
+ * - Dokter  drg. Budi    : 081200000003 / password  (Poli Gigi dan Mulut, 15:00-23:00)
+ * - Dokter  dr. Rina     : 081200000004 / password  (Poli KIA, 15:00-23:00)
  */
 class KonsultasiSeeder extends Seeder
 {
@@ -43,24 +43,26 @@ class KonsultasiSeeder extends Seeder
                 ['nama_poli' => 'Poli Umum', 'kode_poli' => 'PU', 'deskripsi' => 'Pemeriksaan kesehatan umum'],
             ];
 
+            // Poli disimpan dengan kunci nama poli, supaya dokter tidak salah poli kalau urutan daftar berubah
             $polis = collect($polisData)
-                ->map(fn ($p) => Poli::firstOrCreate(
-                    ['klinik_cabang_id' => $cabang->id, 'nama_poli' => $p['nama_poli']],
-                    ['kode_poli' => $p['kode_poli'], 'deskripsi' => $p['deskripsi'], 'status' => true]
-                ));
+                ->mapWithKeys(fn ($p) => [
+                    $p['nama_poli'] => Poli::firstOrCreate(
+                        ['klinik_cabang_id' => $cabang->id, 'nama_poli' => $p['nama_poli']],
+                        ['kode_poli' => $p['kode_poli'], 'deskripsi' => $p['deskripsi'], 'status' => true]
+                    ),
+                ]);
 
-            // [nama, email, no_hp, index poli]
+            // [nama, email, no_hp, nama poli, jam mulai, jam selesai]
             $daftarDokter = [
-                ['dr. Andi', 'dokter.andi@test.com', '081200000001', 0],
-                ['dr. Sari', 'dokter.sari@test.com', '081200000002', 0],
-                ['drg. Budi', 'dokter.budi@test.com', '081200000003', 1],
-                ['dr. Rina', 'dokter.rina@test.com', '081200000004', 2],
+                ['dr. Andi', 'dokter.andi@test.com', '081200000001', 'Poli Umum', '07:00:00', '23:00:00'],
+                ['dr. Sari', 'dokter.sari@test.com', '081200000002', 'Poli Umum', '15:00:00', '23:00:00'],
+                ['drg. Budi', 'dokter.budi@test.com', '081200000003', 'Poli Gigi dan Mulut', '15:00:00', '23:00:00'],
+                ['dr. Rina', 'dokter.rina@test.com', '081200000004', 'Poli KIA', '15:00:00', '23:00:00'],
             ];
 
             $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
 
-            foreach ($daftarDokter as $i => [$nama, $email, $noHp, $poliIndex]) {
-                // updateOrCreate: akun lama ikut diperbarui (no_hp, password, status) saat seeder dijalankan ulang
+            foreach ($daftarDokter as $i => [$nama, $email, $noHp, $namaPoli, $mulai, $selesai]) {
                 $user = $this->akunUji($email, $nama, $noHp, 'dokter');
 
                 $dokter = Doctor::firstOrCreate(
@@ -68,13 +70,17 @@ class KonsultasiSeeder extends Seeder
                     ['nomor_sip' => 'SIP-'.str_pad($i + 1, 4, '0', STR_PAD_LEFT)]
                 );
 
-                // dr. Andi praktik dari pagi sampai malam, dokter lain shift siang sampai malam
-                [$mulai, $selesai] = $i === 0 ? ['07:00:00', '23:00:00'] : ['15:00:00', '23:00:00'];
+                $poli = $polis[$namaPoli];
+
+                // Jadwal dokter ini di poli lain (sisa seeder lama) dinonaktifkan
+                DoctorSchedule::where('doctor_id', $dokter->id)
+                    ->where('poli_id', '!=', $poli->id)
+                    ->update(['status' => false]);
 
                 foreach ($hari as $h) {
                     // updateOrCreate: jadwal lama di database ikut diperbarui saat seeder dijalankan ulang
                     DoctorSchedule::updateOrCreate(
-                        ['doctor_id' => $dokter->id, 'poli_id' => $polis[$poliIndex]->id, 'hari' => $h],
+                        ['doctor_id' => $dokter->id, 'poli_id' => $poli->id, 'hari' => $h],
                         ['jam_mulai' => $mulai, 'jam_selesai' => $selesai, 'kuota' => 10, 'status' => true]
                     );
                 }
